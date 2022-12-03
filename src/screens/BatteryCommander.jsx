@@ -8,8 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {Picker} from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import SelectDropdown from 'react-native-select-dropdown';
 
 import ModalBlock from '../components/Modal';
 import BasicData from '../components/BasicData';
@@ -23,15 +23,34 @@ import DescriptionTarget from '../components/DescriptionTarget';
 import shotingTables from '../DB/shotingTables';
 import Cancel from '../image/cancel.png';
 
+// const stateBasicData = {
+//   mainStream,
+//   frontFP,
+//   trajectory,
+//   nameCharge,
+// };
+
+// const stateObservantPosition = {
+//   coordinateOPX,
+//   coordinateOPY,
+//   heightOP,
+// };
+
+// const stateFirePosition = {
+//   coordinateFPX,
+//   coordinateFPY,
+//   heightFP,
+// };
+
 const BatteryCommander = () => {
   const [targets, setTargets] = React.useState([]);
   const [targetsIndex, setTargetsIndex] = React.useState('');
-  const [fuseIndex, setFuseIndex] = React.useState(0);
+  const [fuseName, setFuseName] = React.useState({});
 
   const [mainStream, setMainStream] = React.useState('');
   const [frontFP, setFrontFP] = React.useState('');
-  const [trajectory, setTrajectory] = React.useState('');
-  const [nameCharge, setNameCharge] = React.useState('');
+  const [trajectory, setTrajectory] = React.useState({});
+  const [nameCharge, setNameCharge] = React.useState({});
 
   const [coordinateOPX, setCoordinateOPX] = React.useState('');
   const [coordinateOPY, setCoordinateOPY] = React.useState('');
@@ -69,10 +88,32 @@ const BatteryCommander = () => {
   const [isVisible, setIsVisible] = React.useState(true);
   const [isLoading, setIsLoading] = React.useState(true);
 
+  const charges = [
+    {charge: 'п', id: 0},
+    {charge: 'у', id: 1},
+    {charge: 1, id: 2},
+    {charge: 2, id: 3},
+    {charge: 3, id: 4},
+    {charge: 4, id: 5},
+  ];
+
+  const trajectories = [
+    {trajectory: 'н', id: 0},
+    {trajectory: 'м', id: 1},
+  ];
+
+  const fuse = [
+    {fuseName: 'РГМ-2М', id: 0},
+    {fuseName: 'В-90', id: 1},
+    {fuseName: 'Т-7', id: 2},
+    {fuseName: 'Т-90', id: 3},
+    {fuseName: 'ДТМ-75', id: 4},
+  ];
+
   const obj = {
     targets,
     targetsIndex,
-    fuseIndex,
+    fuseName,
     mainStream,
     frontFP,
     trajectory,
@@ -103,16 +144,18 @@ const BatteryCommander = () => {
     amendmentAngle,
     isVisible,
   };
+
   React.useEffect(() => {
     setIsLoading(true);
     getData();
   }, []);
+
   React.useEffect(() => {
     storeData();
   }, [
     targets,
     targetsIndex,
-    fuseIndex,
+    fuseName,
     mainStream,
     frontFP,
     trajectory,
@@ -147,12 +190,11 @@ const BatteryCommander = () => {
   const getData = async () => {
     try {
       const jsonValue = await AsyncStorage.getItem('data');
-
       if (jsonValue !== null) {
         const data = JSON.parse(jsonValue);
         setTargets(data.targets);
         setTargetsIndex(data.targetsIndex);
-        setFuseIndex(data.fuseIndex);
+        setFuseName(data.fuseName);
         setMainStream(data.mainStream);
         setFrontFP(data.frontFP);
         setTrajectory(data.trajectory);
@@ -855,6 +897,7 @@ const BatteryCommander = () => {
 
   const addTargets = () => {
     const target = {
+      id: targets.length,
       coordinateTargetX,
       coordinateTargetY,
       heightTarget,
@@ -867,6 +910,8 @@ const BatteryCommander = () => {
       depthTarget,
     };
     setTargets([...targets, target]);
+  };
+  const clearTargetInput = () => {
     setCoordinateTargetX('');
     setCoordinateTargetY('');
     setHeightTarget('');
@@ -894,8 +939,6 @@ const BatteryCommander = () => {
     }
   }, [targetsIndex]);
 
-  const fuse = ['РГМ-2М', 'В-90', 'Т-7', 'Т-90', 'ДТМ-75'];
-
   return (
     <>
       {!isLoading && (
@@ -907,21 +950,28 @@ const BatteryCommander = () => {
             trajectory={trajectory}
             nameChargePrimary={nameCharge}
           />
-          <Picker
-            style={{
+          <SelectDropdown
+            buttonStyle={{
               backgroundColor: '#576644',
-              marginTop: 15,
               width: '49%',
               height: 45,
               paddingLeft: 10,
               fontSize: 18,
+              marginTop: 15,
             }}
-            selectedValue={fuseIndex}
-            onValueChange={(itemValue, itemIndex) => setFuseIndex(itemIndex)}>
-            {fuse.map((item, index) => (
-              <Picker.Item key={index} label={item} value={index} />
-            ))}
-          </Picker>
+            data={fuse.map(item => item.fuseName)}
+            onSelect={(selectedItem, index) => {
+              setFuseName({fuse: selectedItem, id: index});
+            }}
+            buttonTextAfterSelection={(selectedItem, index) => {
+              return selectedItem;
+            }}
+            rowTextForSelection={(item, index) => {
+              return item;
+            }}
+            defaultButtonText={'Взрыватель'}
+            defaultValueByIndex={fuseName.id}
+          />
           <View style={styles.container}>
             {/* Вхлдные данные */}
             <BasicData
@@ -933,6 +983,8 @@ const BatteryCommander = () => {
               setTrajectory={setTrajectory}
               nameCharge={nameCharge}
               setNameCharge={setNameCharge}
+              charges={charges}
+              trajectories={trajectories}
             />
             {/* КНП */}
             <ObservationPost
@@ -962,33 +1014,36 @@ const BatteryCommander = () => {
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 marginTop: 15,
+                flexWrap: 'wrap',
               }}>
-              <Picker
-                style={{
+              <SelectDropdown
+                buttonStyle={{
                   backgroundColor: '#576644',
                   width: '49%',
-                  borderStyle: 'solid',
-                  borderColor: 'black',
                   height: 45,
                   paddingLeft: 10,
                   fontSize: 18,
                 }}
-                selectedValue={targetsIndex}
-                onValueChange={(itemValue, itemIndex) =>
-                  setTargetsIndex(itemIndex)
-                }>
-                {targets.map((item, index) => (
-                  <Picker.Item
-                    key={index}
-                    label={`Ц-${item.numberTarget} ${item.nameTarget}`}
-                    value={index}
-                  />
-                ))}
-              </Picker>
+                data={targets.map(
+                  item => `Ц-${item.numberTarget} ${item.nameTarget}`,
+                )}
+                onSelect={(selectedItem, index) => {
+                  setTargetsIndex(index);
+                }}
+                buttonTextAfterSelection={(selectedItem, index) => {
+                  return selectedItem;
+                }}
+                rowTextForSelection={(item, index) => {
+                  return item;
+                }}
+                defaultButtonText={'Цели'}
+                defaultValueByIndex={targetsIndex}
+              />
               <TouchableOpacity
                 onPress={() => {
                   setTargets([]);
                   setTargetsIndex('');
+                  clearTargetInput();
                 }}
                 style={{
                   backgroundColor: '#7e8d3b',
@@ -1041,7 +1096,10 @@ const BatteryCommander = () => {
             />
             <TouchableOpacity
               disabled={numberTarget.length === 0}
-              onPress={addTargets}
+              onPress={() => {
+                addTargets();
+                clearTargetInput();
+              }}
               style={styles.buttonStop}>
               <Text
                 style={{color: '#ffffff', fontSize: 22, fontWeight: 'bold'}}>
