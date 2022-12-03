@@ -4,103 +4,89 @@ import SelectDropdown from 'react-native-select-dropdown';
 
 import Input from './Input';
 
-const BasicData = ({
-  mainStream,
-  setMainStream,
-  frontFP,
-  setFrontFP,
-  trajectories,
-  charges,
-  trajectory,
-  setTrajectory,
-  nameCharge,
-  setNameCharge,
-}) => {
-  const inputs = [
-    {
-      id: 0,
-      state: mainStream,
-      keyboardType: 'numeric',
-      setState: setMainStream,
-      placeholder: 'ОН',
-      placeholderTextColor: 'black',
-      maxLength: 2,
-      text: 'ОН:',
-    },
-    {
-      id: 1,
-      state: frontFP,
-      keyboardType: 'numeric',
-      setState: setFrontFP,
-      placeholder: 'Фронт батареи',
-      placeholderTextColor: 'black',
-      maxLength: 3,
-      text: 'Фб:',
-    },
-  ];
+const fuse = [
+  {fuseName: 'РГМ-2М', id: 0},
+  {fuseName: 'В-90', id: 1},
+  {fuseName: 'Т-7', id: 2},
+  {fuseName: 'Т-90', id: 3},
+  {fuseName: 'ДТМ-75', id: 4},
+];
 
+const charges = [
+  {charge: 'п', id: 0},
+  {charge: 'у', id: 1},
+  {charge: 1, id: 2},
+  {charge: 2, id: 3},
+  {charge: 3, id: 4},
+  {charge: 4, id: 5},
+];
+
+const trajectories = [
+  {trajectory: 'н', id: 0},
+  {trajectory: 'м', id: 1},
+];
+
+const inputs = {
+  mainStream: {
+    placeholder: 'ОН',
+    maxLength: 2,
+    text: 'ОН:',
+  },
+  frontFP: {
+    placeholder: 'Фронт батареи',
+    maxLength: 3,
+    text: 'Фб:',
+  },
+};
+
+export default React.memo(function BasicData({value, setValue}) {
   return (
     <View style={styles.wrapper}>
-      {inputs.map(input => (
+      <View style={{width: '100%'}}>
+        <SelectDropdown
+          buttonStyle={styles.select}
+          data={fuse.map(item => item.fuseName)}
+          onSelect={selectedItem => {
+            setValue('fuseName', selectedItem);
+          }}
+          defaultButtonText={'Взрыватель'}
+          defaultValue={value.fuseName}
+        />
+      </View>
+      <SelectDropdown
+        buttonStyle={styles.select}
+        data={trajectories.map(item => item.trajectory)}
+        onSelect={selectedItem => {
+          setValue('trajectory', selectedItem);
+        }}
+        defaultButtonText={'Траектория'}
+        defaultValue={value.trajectory}
+      />
+      <SelectDropdown
+        buttonStyle={styles.select}
+        data={charges.map(item => item.charge)}
+        onSelect={selectedItem => {
+          setValue('nameCharge', selectedItem);
+        }}
+        defaultButtonText={'Заряд'}
+        defaultValue={value.nameCharge}
+      />
+      {Object.entries(inputs).map(([key, item]) => (
         <Input
-          key={input.id}
-          state={input.state}
-          keyboardType={input.keyboardType}
-          setState={input.setState}
-          placeholder={input.placeholder}
-          placeholderTextColor={input.placeholderTextColor}
-          maxLength={input.maxLength}
-          text={input.text}
+          key={key}
+          state={value[key]}
+          keyboardType={'numeric'}
+          setState={value => setValue(key, value)}
+          placeholder={item.placeholder}
+          placeholderTextColor={'black'}
+          maxLength={item.maxLength}
+          text={item.text}
           style={styles.inputWrapper}
         />
       ))}
-      <SelectDropdown
-        buttonStyle={{
-          backgroundColor: '#576644',
-          width: '49%',
-          height: 45,
-          paddingLeft: 10,
-          fontSize: 18,
-          marginTop: 15,
-        }}
-        data={trajectories.map(item => item.trajectory)}
-        onSelect={(selectedItem, index) => {
-          setTrajectory({trajectory: selectedItem, id: index});
-        }}
-        buttonTextAfterSelection={(selectedItem, index) => {
-          return selectedItem;
-        }}
-        rowTextForSelection={(item, index) => {
-          return item;
-        }}
-        defaultButtonText={'Траектория'}
-        defaultValueByIndex={trajectory.id}
-      />
-      <SelectDropdown
-        buttonStyle={{
-          backgroundColor: '#576644',
-          width: '49%',
-          height: 45,
-          paddingLeft: 10,
-          fontSize: 18,
-          marginTop: 15,
-        }}
-        data={charges.map(item => item.charge)}
-        onSelect={(selectedItem, index) => {
-          setNameCharge({charge: selectedItem, id: index});
-        }}
-        buttonTextAfterSelection={(selectedItem, index) => {
-          return selectedItem;
-        }}
-        rowTextForSelection={(item, index) => {
-          return item;
-        }}
-        defaultButtonText={'Заряд'}
-        defaultValueByIndex={nameCharge.id}
-      />
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -122,6 +108,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderStyle: 'solid',
   },
+  select: {
+    backgroundColor: '#576644',
+    width: '49%',
+    height: 45,
+    paddingLeft: 10,
+    fontSize: 18,
+    marginTop: 15,
+  },
 });
-
-export default BasicData;

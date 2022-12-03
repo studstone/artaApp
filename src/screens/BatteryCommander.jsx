@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   Image,
   ScrollView,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SelectDropdown from 'react-native-select-dropdown';
 
@@ -23,38 +24,44 @@ import DescriptionTarget from '../components/DescriptionTarget';
 import shotingTables from '../DB/shotingTables';
 import Cancel from '../image/cancel.png';
 
-// const stateBasicData = {
-//   mainStream,
-//   frontFP,
-//   trajectory,
-//   nameCharge,
-// };
+const initBasicData = {
+  fuseName: null,
+  mainStream: '',
+  frontFP: '',
+  trajectory: null,
+  nameCharge: null,
+};
 
-// const stateObservantPosition = {
-//   coordinateOPX,
-//   coordinateOPY,
-//   heightOP,
-// };
+const initOPData = {
+  coordinateOPX: '',
+  coordinateOPY: '',
+  heightOP: '',
+};
 
-// const stateFirePosition = {
-//   coordinateFPX,
-//   coordinateFPY,
-//   heightFP,
+const initFPData = {
+  coordinateFPX: '',
+  coordinateFPY: '',
+  heightFP: '',
+};
+
+// const targetData = {
+//   coordinateTargetX: '',
+//   coordinateTargetY: '',
+//   heightTarget: '',
+//   rangeTarget: '',
+//   verticalAngleTarget: '',
+//   numberTarget: '',
+//   frontTarget: '',
+//   depthTarget: '',
 // };
 
 const BatteryCommander = () => {
   const [targets, setTargets] = React.useState([]);
   const [targetsIndex, setTargetsIndex] = React.useState('');
-  const [fuseName, setFuseName] = React.useState({});
 
-  const [mainStream, setMainStream] = React.useState('');
-  const [frontFP, setFrontFP] = React.useState('');
-  const [trajectory, setTrajectory] = React.useState({});
-  const [nameCharge, setNameCharge] = React.useState({});
-
-  const [coordinateOPX, setCoordinateOPX] = React.useState('');
-  const [coordinateOPY, setCoordinateOPY] = React.useState('');
-  const [heightOP, setHeightOP] = React.useState('');
+  const [basicData, setBasicData] = React.useState({...initBasicData});
+  const [OPData, setOPData] = React.useState({...initOPData});
+  const [FPData, setFPData] = React.useState({...initFPData});
 
   const [coordinateFPX, setCoordinateFPX] = React.useState('');
   const [coordinateFPY, setCoordinateFPY] = React.useState('');
@@ -88,42 +95,33 @@ const BatteryCommander = () => {
   const [isVisible, setIsVisible] = React.useState(true);
   const [isLoading, setIsLoading] = React.useState(true);
 
-  const charges = [
-    {charge: 'п', id: 0},
-    {charge: 'у', id: 1},
-    {charge: 1, id: 2},
-    {charge: 2, id: 3},
-    {charge: 3, id: 4},
-    {charge: 4, id: 5},
-  ];
+  const changeBasicData = (key, value) => {
+    setBasicData(prev => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
-  const trajectories = [
-    {trajectory: 'н', id: 0},
-    {trajectory: 'м', id: 1},
-  ];
+  const changeOPData = (key, value) => {
+    setOPData(prev => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
-  const fuse = [
-    {fuseName: 'РГМ-2М', id: 0},
-    {fuseName: 'В-90', id: 1},
-    {fuseName: 'Т-7', id: 2},
-    {fuseName: 'Т-90', id: 3},
-    {fuseName: 'ДТМ-75', id: 4},
-  ];
+  const changeFPData = (key, value) => {
+    setFPData(prev => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
   const obj = {
     targets,
     targetsIndex,
-    fuseName,
-    mainStream,
-    frontFP,
-    trajectory,
-    nameCharge,
-    coordinateOPX,
-    coordinateOPY,
-    heightOP,
-    coordinateFPX,
-    coordinateFPY,
-    heightFP,
+    basicData,
+    OPData,
+    FPData,
     coordinateTargetX,
     coordinateTargetY,
     heightTarget,
@@ -155,17 +153,9 @@ const BatteryCommander = () => {
   }, [
     targets,
     targetsIndex,
-    fuseName,
-    mainStream,
-    frontFP,
-    trajectory,
-    nameCharge,
-    coordinateOPX,
-    coordinateOPY,
-    heightOP,
-    coordinateFPX,
-    coordinateFPY,
-    heightFP,
+    basicData,
+    OPData,
+    FPData,
     coordinateTargetX,
     coordinateTargetY,
     heightTarget,
@@ -194,17 +184,9 @@ const BatteryCommander = () => {
         const data = JSON.parse(jsonValue);
         setTargets(data.targets);
         setTargetsIndex(data.targetsIndex);
-        setFuseName(data.fuseName);
-        setMainStream(data.mainStream);
-        setFrontFP(data.frontFP);
-        setTrajectory(data.trajectory);
-        setNameCharge(data.nameCharge);
-        setCoordinateOPX(data.coordinateOPX);
-        setCoordinateOPY(data.coordinateOPY);
-        setHeightOP(data.heightOP);
-        setCoordinateFPX(data.coordinateFPX);
-        setCoordinateFPY(data.coordinateFPY);
-        setHeightFP(data.heightFP);
+        setBasicData(data.basicData);
+        setOPData(data.OPData);
+        setFPData(data.FPData);
         setCoordinateTargetX(data.coordinateTargetX);
         setCoordinateTargetY(data.coordinateTargetY);
         setHeightTarget(data.heightTarget);
@@ -241,775 +223,729 @@ const BatteryCommander = () => {
   };
 
   /** расчет х,у цели*/
-  const coordinateTargetСalculation = () => {
-    if (
-      isVisible &&
-      coordinateTargetX &&
-      coordinateFPX &&
-      coordinateTargetY.length > 4 &&
-      coordinateFPY
-    ) {
-      const targetX = coordinateTargetX;
-      const targetY = coordinateTargetY;
-      return {targetX, targetY};
-    } else if (
-      !isVisible &&
-      coordinateFPX &&
-      coordinateFPY &&
-      coordinateOPX &&
-      coordinateOPY &&
-      rangeTarget &&
-      angleTarget.length > 3
-    ) {
-      const coordinateX = +coordinateOPX;
-      const coordinateY = +coordinateOPY;
-      const angle = +angleTarget;
+  // const coordinateTargetСalculation = () => {
+  //   if (
+  //     isVisible &&
+  //     coordinateTargetX &&
+  //     coordinateFPX &&
+  //     coordinateTargetY.length > 4 &&
+  //     coordinateFPY
+  //   ) {
+  //     const targetX = coordinateTargetX;
+  //     const targetY = coordinateTargetY;
+  //     return {targetX, targetY};
+  //   } else if (
+  //     !isVisible &&
+  //     coordinateFPX &&
+  //     coordinateFPY &&
+  //     coordinateOPX &&
+  //     coordinateOPY &&
+  //     rangeTarget &&
+  //     angleTarget.length > 3
+  //   ) {
+  //     const coordinateX = +coordinateOPX;
+  //     const coordinateY = +coordinateOPY;
+  //     const angle = +angleTarget;
 
-      const targetX = String(
-        Math.round(
-          coordinateX + rangeTarget * Math.cos(angle * 6 * (Math.PI / 180)),
-        ),
-      );
-      const targetY = String(
-        Math.round(
-          coordinateY + rangeTarget * Math.sin(angle * 6 * (Math.PI / 180)),
-        ),
-      );
+  //     const targetX = String(
+  //       Math.round(
+  //         coordinateX + rangeTarget * Math.cos(angle * 6 * (Math.PI / 180)),
+  //       ),
+  //     );
+  //     const targetY = String(
+  //       Math.round(
+  //         coordinateY + rangeTarget * Math.sin(angle * 6 * (Math.PI / 180)),
+  //       ),
+  //     );
 
-      return {targetX, targetY};
-    } else {
-      const targetX = 0;
-      const targetY = 0;
-      return {targetX, targetY};
-    }
-  };
-  /*расчет топо дальности*/
-  const rangeСalculation = () => {
-    if (
-      isVisible &&
-      coordinateTargetX &&
-      coordinateFPX &&
-      coordinateTargetY.length > 4 &&
-      coordinateFPY
-    ) {
-      let topographicRange = 0;
-      const coordinateX = +coordinateOPX;
-      const coordinateY = +coordinateOPY;
-      const angle = +angleTarget;
+  //     return {targetX, targetY};
+  //   } else {
+  //     const targetX = 0;
+  //     const targetY = 0;
+  //     return {targetX, targetY};
+  //   }
+  // };
+  // /*расчет топо дальности*/
+  // const rangeСalculation = () => {
+  //   if (
+  //     isVisible &&
+  //     coordinateTargetX &&
+  //     coordinateFPX &&
+  //     coordinateTargetY.length > 4 &&
+  //     coordinateFPY
+  //   ) {
+  //     let topographicRange = 0;
+  //     const coordinateX = +coordinateOPX;
+  //     const coordinateY = +coordinateOPY;
+  //     const angle = +angleTarget;
 
-      if (isVisible) {
-        topographicRange = Math.round(
-          Math.sqrt(
-            Math.pow(coordinateTargetX - coordinateFPX, 2) +
-              Math.pow(coordinateTargetY - coordinateFPY, 2),
-          ),
-        );
-      } else {
-        const targetX = Math.round(
-          coordinateX + rangeTarget * Math.cos(angle * 6 * (Math.PI / 180)),
-        );
-        const targetY = Math.round(
-          coordinateY + rangeTarget * Math.sin(angle * 6 * (Math.PI / 180)),
-        );
-        topographicRange = Math.round(
-          Math.sqrt(
-            Math.pow(targetX - coordinateFPX, 2) +
-              Math.pow(targetY - coordinateFPY, 2),
-          ),
-        );
-      }
-      return +topographicRange;
-    } else if (
-      !isVisible &&
-      coordinateFPX &&
-      coordinateFPY &&
-      coordinateOPX &&
-      coordinateOPY &&
-      rangeTarget &&
-      angleTarget.length > 3
-    ) {
-      let topographicRange = 0;
-      const coordinateX = +coordinateOPX;
-      const coordinateY = +coordinateOPY;
-      const angle = +angleTarget;
+  //     if (isVisible) {
+  //       topographicRange = Math.round(
+  //         Math.sqrt(
+  //           Math.pow(coordinateTargetX - coordinateFPX, 2) +
+  //             Math.pow(coordinateTargetY - coordinateFPY, 2),
+  //         ),
+  //       );
+  //     } else {
+  //       const targetX = Math.round(
+  //         coordinateX + rangeTarget * Math.cos(angle * 6 * (Math.PI / 180)),
+  //       );
+  //       const targetY = Math.round(
+  //         coordinateY + rangeTarget * Math.sin(angle * 6 * (Math.PI / 180)),
+  //       );
+  //       topographicRange = Math.round(
+  //         Math.sqrt(
+  //           Math.pow(targetX - coordinateFPX, 2) +
+  //             Math.pow(targetY - coordinateFPY, 2),
+  //         ),
+  //       );
+  //     }
+  //     return +topographicRange;
+  //   } else if (
+  //     !isVisible &&
+  //     coordinateFPX &&
+  //     coordinateFPY &&
+  //     coordinateOPX &&
+  //     coordinateOPY &&
+  //     rangeTarget &&
+  //     angleTarget.length > 3
+  //   ) {
+  //     let topographicRange = 0;
+  //     const coordinateX = +coordinateOPX;
+  //     const coordinateY = +coordinateOPY;
+  //     const angle = +angleTarget;
 
-      if (isVisible) {
-        topographicRange = Math.round(
-          Math.sqrt(
-            Math.pow(coordinateTargetX - coordinateFPX, 2) +
-              Math.pow(coordinateTargetY - coordinateFPY, 2),
-          ),
-        );
-      } else {
-        const targetX = Math.round(
-          coordinateX + rangeTarget * Math.cos(angle * 6 * (Math.PI / 180)),
-        );
-        const targetY = Math.round(
-          coordinateY + rangeTarget * Math.sin(angle * 6 * (Math.PI / 180)),
-        );
-        topographicRange = Math.round(
-          Math.sqrt(
-            Math.pow(targetX - coordinateFPX, 2) +
-              Math.pow(targetY - coordinateFPY, 2),
-          ),
-        );
-      }
+  //     if (isVisible) {
+  //       topographicRange = Math.round(
+  //         Math.sqrt(
+  //           Math.pow(coordinateTargetX - coordinateFPX, 2) +
+  //             Math.pow(coordinateTargetY - coordinateFPY, 2),
+  //         ),
+  //       );
+  //     } else {
+  //       const targetX = Math.round(
+  //         coordinateX + rangeTarget * Math.cos(angle * 6 * (Math.PI / 180)),
+  //       );
+  //       const targetY = Math.round(
+  //         coordinateY + rangeTarget * Math.sin(angle * 6 * (Math.PI / 180)),
+  //       );
+  //       topographicRange = Math.round(
+  //         Math.sqrt(
+  //           Math.pow(targetX - coordinateFPX, 2) +
+  //             Math.pow(targetY - coordinateFPY, 2),
+  //         ),
+  //       );
+  //     }
 
-      return +topographicRange;
-    } else {
-      const topographicRange = 0;
-      return +topographicRange;
-    }
-  };
-  /*расчет исчисленной дальности*/
-  const calculatedRangeСalculation = () => {
-    const calculatedRange = rangeСalculation() + +amendmentRange;
+  //     return +topographicRange;
+  //   } else {
+  //     const topographicRange = 0;
+  //     return +topographicRange;
+  //   }
+  // };
+  // /*расчет исчисленной дальности*/
+  // const calculatedRangeСalculation = () => {
+  //   const calculatedRange = rangeСalculation() + +amendmentRange;
 
-    return calculatedRange;
-  };
+  //   return calculatedRange;
+  // };
 
-  /*расчет данных ТС*/
-  const returnDataST = () => {
-    try {
-      let supportingRange = 0;
-      let supportingAim = 0;
-      let dXtis = 0;
-      let dRange = 0;
-      let installationFuse = '';
-      let time = 0;
-      let Vd = 0;
+  // /*расчет данных ТС*/
+  // const returnDataST = () => {
+  //   try {
+  //     let supportingRange = 0;
+  //     let supportingAim = 0;
+  //     let dXtis = 0;
+  //     let dRange = 0;
+  //     let installationFuse = '';
+  //     let time = 0;
+  //     let Vd = 0;
 
-      if (trajectory.toLocaleLowerCase() === 'н') {
-        supportingRange = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
-          .find(el => el.range >= calculatedRangeСalculation()).range;
-        supportingAim = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
-          .find(el => el.range >= calculatedRangeСalculation()).aim;
-        dXtis = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
-          .find(el => el.range >= calculatedRangeСalculation()).dXtis;
-        dRange = supportingRange - calculatedRangeСalculation();
-        installationFuse = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
-          .find(
-            el => el.range >= calculatedRangeСalculation(),
-          ).installationFuse;
-        time = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
-          .find(el => el.range >= calculatedRangeСalculation()).Tc;
-        Vd = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
-          .find(el => el.range >= calculatedRangeСalculation()).Vd;
-      } else {
-        supportingRange = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
-          .find(el => el.range <= calculatedRangeСalculation()).range;
-        supportingAim = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
-          .find(el => el.range <= calculatedRangeСalculation()).aim;
-        dXtis = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
-          .find(el => el.range <= calculatedRangeСalculation()).dXtis;
-        dRange = calculatedRangeСalculation() - supportingRange;
-        installationFuse = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
-          .find(
-            el => el.range <= calculatedRangeСalculation(),
-          ).installationFuse;
-        time = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
-          .find(el => el.range <= calculatedRangeСalculation()).Tc;
-        Vd = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
-          .find(el => el.range <= calculatedRangeСalculation()).Vd;
-      }
-      return {
-        supportingRange,
-        supportingAim,
-        dXtis,
-        dRange,
-        installationFuse,
-        time,
-        Vd,
-      };
-    } catch (err) {
-      const supportingRange = 0;
-      const supportingAim = 0;
-      const dXtis = 0;
-      const dRange = 0;
-      const installationFuse = '';
-      const time = 0;
-      const Vd = 0;
+  //     if (trajectory.toLocaleLowerCase() === 'н') {
+  //       supportingRange = shotingTables
+  //         .filter(el => el.name === nameCharge.toLocaleLowerCase())
+  //         .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+  //         .find(el => el.range >= calculatedRangeСalculation()).range;
+  //       supportingAim = shotingTables
+  //         .filter(el => el.name === nameCharge.toLocaleLowerCase())
+  //         .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+  //         .find(el => el.range >= calculatedRangeСalculation()).aim;
+  //       dXtis = shotingTables
+  //         .filter(el => el.name === nameCharge.toLocaleLowerCase())
+  //         .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+  //         .find(el => el.range >= calculatedRangeСalculation()).dXtis;
+  //       dRange = supportingRange - calculatedRangeСalculation();
+  //       installationFuse = shotingTables
+  //         .filter(el => el.name === nameCharge.toLocaleLowerCase())
+  //         .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+  //         .find(
+  //           el => el.range >= calculatedRangeСalculation(),
+  //         ).installationFuse;
+  //       time = shotingTables
+  //         .filter(el => el.name === nameCharge.toLocaleLowerCase())
+  //         .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+  //         .find(el => el.range >= calculatedRangeСalculation()).Tc;
+  //       Vd = shotingTables
+  //         .filter(el => el.name === nameCharge.toLocaleLowerCase())
+  //         .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+  //         .find(el => el.range >= calculatedRangeСalculation()).Vd;
+  //     } else {
+  //       supportingRange = shotingTables
+  //         .filter(el => el.name === nameCharge.toLocaleLowerCase())
+  //         .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+  //         .find(el => el.range <= calculatedRangeСalculation()).range;
+  //       supportingAim = shotingTables
+  //         .filter(el => el.name === nameCharge.toLocaleLowerCase())
+  //         .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+  //         .find(el => el.range <= calculatedRangeСalculation()).aim;
+  //       dXtis = shotingTables
+  //         .filter(el => el.name === nameCharge.toLocaleLowerCase())
+  //         .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+  //         .find(el => el.range <= calculatedRangeСalculation()).dXtis;
+  //       dRange = calculatedRangeСalculation() - supportingRange;
+  //       installationFuse = shotingTables
+  //         .filter(el => el.name === nameCharge.toLocaleLowerCase())
+  //         .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+  //         .find(
+  //           el => el.range <= calculatedRangeСalculation(),
+  //         ).installationFuse;
+  //       time = shotingTables
+  //         .filter(el => el.name === nameCharge.toLocaleLowerCase())
+  //         .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+  //         .find(el => el.range <= calculatedRangeСalculation()).Tc;
+  //       Vd = shotingTables
+  //         .filter(el => el.name === nameCharge.toLocaleLowerCase())
+  //         .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+  //         .find(el => el.range <= calculatedRangeСalculation()).Vd;
+  //     }
+  //     return {
+  //       supportingRange,
+  //       supportingAim,
+  //       dXtis,
+  //       dRange,
+  //       installationFuse,
+  //       time,
+  //       Vd,
+  //     };
+  //   } catch (err) {
+  //     const supportingRange = 0;
+  //     const supportingAim = 0;
+  //     const dXtis = 0;
+  //     const dRange = 0;
+  //     const installationFuse = '';
+  //     const time = 0;
+  //     const Vd = 0;
 
-      return {
-        supportingRange,
-        supportingAim,
-        dXtis,
-        dRange,
-        installationFuse,
-        time,
-        Vd,
-      };
-    }
-  };
-  /*расчет прицела*/
-  const rangeFinalСalculation = () => {
-    const supportingAim = returnDataST().supportingAim;
-    const dXtis = returnDataST().dXtis;
-    const dRange = returnDataST().dRange;
-    let dAim = 0;
+  //     return {
+  //       supportingRange,
+  //       supportingAim,
+  //       dXtis,
+  //       dRange,
+  //       installationFuse,
+  //       time,
+  //       Vd,
+  //     };
+  //   }
+  // };
+  // /*расчет прицела*/
+  // const rangeFinalСalculation = () => {
+  //   const supportingAim = returnDataST().supportingAim;
+  //   const dXtis = returnDataST().dXtis;
+  //   const dRange = returnDataST().dRange;
+  //   let dAim = 0;
 
-    if (dXtis === 0 && dRange === 0) {
-      dAim = 0;
-    } else {
-      dAim = Math.round(dRange / dXtis);
-    }
+  //   if (dXtis === 0 && dRange === 0) {
+  //     dAim = 0;
+  //   } else {
+  //     dAim = Math.round(dRange / dXtis);
+  //   }
 
-    let aim = supportingAim - dAim;
+  //   let aim = supportingAim - dAim;
 
-    if (aim < 0) {
-      return (aim = 0);
-    } else {
-      return aim;
-    }
-  };
-  /*расчет уровня*/
-  const excessСalculation = () => {
-    if (rangeСalculation() !== 0) {
-      const topographicRange = rangeСalculation();
-      let height = 0;
+  //   if (aim < 0) {
+  //     return (aim = 0);
+  //   } else {
+  //     return aim;
+  //   }
+  // };
+  // /*расчет уровня*/
+  // const excessСalculation = () => {
+  //   if (rangeСalculation() !== 0) {
+  //     const topographicRange = rangeСalculation();
+  //     let height = 0;
 
-      if (isVisible) {
-        height = heightTarget;
-      } else {
-        height = +heightOP + (rangeTarget * verticalAngleTarget) / 955;
-      }
-      const excess = (
-        ((height - heightFP) / (0.001 * topographicRange)) * 0.01 +
-        30
-      ).toFixed(2);
+  //     if (isVisible) {
+  //       height = heightTarget;
+  //     } else {
+  //       height = +heightOP + (rangeTarget * verticalAngleTarget) / 955;
+  //     }
+  //     const excess = (
+  //       ((height - heightFP) / (0.001 * topographicRange)) * 0.01 +
+  //       30
+  //     ).toFixed(2);
 
-      return excess;
-    } else {
-      const excess = 0;
-      return excess;
-    }
-  };
-  /*расчет дир.угл б-ц*/
-  const angleСalculation = () => {
-    const coordinateX = +coordinateOPX;
-    const coordinateY = +coordinateOPY;
-    const angleT = +angleTarget;
+  //     return excess;
+  //   } else {
+  //     const excess = 0;
+  //     return excess;
+  //   }
+  // };
+  // /*расчет дир.угл б-ц*/
+  // const angleСalculation = () => {
+  //   const coordinateX = +coordinateOPX;
+  //   const coordinateY = +coordinateOPY;
+  //   const angleT = +angleTarget;
 
-    let directionalAngle = 0;
-    let angle = 0;
+  //   let directionalAngle = 0;
+  //   let angle = 0;
 
-    if (isVisible) {
-      directionalAngle =
-        (Math.atan2(
-          coordinateTargetY - coordinateFPY,
-          coordinateTargetX - coordinateFPX,
-        ) *
-          180) /
-        Math.PI /
-        6;
-    } else {
-      const targetX = Math.round(
-        coordinateX + rangeTarget * Math.cos(angleT * 6 * (Math.PI / 180)),
-      );
-      const targetY = Math.round(
-        coordinateY + rangeTarget * Math.sin(angleT * 6 * (Math.PI / 180)),
-      );
-      directionalAngle =
-        (Math.atan2(targetY - coordinateFPY, targetX - coordinateFPX) * 180) /
-        Math.PI /
-        6;
-    }
+  //   if (isVisible) {
+  //     directionalAngle =
+  //       (Math.atan2(
+  //         coordinateTargetY - coordinateFPY,
+  //         coordinateTargetX - coordinateFPX,
+  //       ) *
+  //         180) /
+  //       Math.PI /
+  //       6;
+  //   } else {
+  //     const targetX = Math.round(
+  //       coordinateX + rangeTarget * Math.cos(angleT * 6 * (Math.PI / 180)),
+  //     );
+  //     const targetY = Math.round(
+  //       coordinateY + rangeTarget * Math.sin(angleT * 6 * (Math.PI / 180)),
+  //     );
+  //     directionalAngle =
+  //       (Math.atan2(targetY - coordinateFPY, targetX - coordinateFPX) * 180) /
+  //       Math.PI /
+  //       6;
+  //   }
 
-    if (directionalAngle < 0) {
-      angle = directionalAngle + 60;
-    } else {
-      angle = directionalAngle;
-    }
-    return angle.toFixed(2);
-  };
-  /*расчет топографического доворота*/
-  const angleFromMainStreamСalculation = () => {
-    let directionAlngle = 0;
+  //   if (directionalAngle < 0) {
+  //     angle = directionalAngle + 60;
+  //   } else {
+  //     angle = directionalAngle;
+  //   }
+  //   return angle.toFixed(2);
+  // };
+  // /*расчет топографического доворота*/
+  // const angleFromMainStreamСalculation = () => {
+  //   let directionAlngle = 0;
 
-    if (angleСalculation() >= 52.5 && angleСalculation() <= 60) {
-      directionAlngle = angleСalculation() - mainStream - 60;
-    } else {
-      directionAlngle = angleСalculation() - mainStream;
-    }
+  //   if (angleСalculation() >= 52.5 && angleСalculation() <= 60) {
+  //     directionAlngle = angleСalculation() - mainStream - 60;
+  //   } else {
+  //     directionAlngle = angleСalculation() - mainStream;
+  //   }
 
-    if (directionAlngle < -15) {
-      directionAlngle = directionAlngle + 60;
-    }
+  //   if (directionAlngle < -15) {
+  //     directionAlngle = directionAlngle + 60;
+  //   }
 
-    return directionAlngle.toFixed(2);
-  };
-  /*расчет исчисленного доворота*/
-  const calculatedAngleFromMainStreamСalculation = () => {
-    const calculatedAngle = +angleFromMainStreamСalculation() + +amendmentAngle;
+  //   return directionAlngle.toFixed(2);
+  // };
+  // /*расчет исчисленного доворота*/
+  // const calculatedAngleFromMainStreamСalculation = () => {
+  //   const calculatedAngle = +angleFromMainStreamСalculation() + +amendmentAngle;
 
-    return calculatedAngle.toFixed(2);
-  };
-  /*выбор установки взрывателя*/
-  const choosingFuseInstallation = () => {
-    let installationFuse = returnDataST().installationFuse;
+  //   return calculatedAngle.toFixed(2);
+  // };
+  // /*выбор установки взрывателя*/
+  // const choosingFuseInstallation = () => {
+  //   let installationFuse = returnDataST().installationFuse;
 
-    if (rangeFinalСalculation() === 0) {
-      return (installationFuse = '');
-    } else {
-      return installationFuse;
-    }
-  };
-  /*расчет веера*/
-  const fanCalculation = () => {
-    let fan = 0;
+  //   if (rangeFinalСalculation() === 0) {
+  //     return (installationFuse = '');
+  //   } else {
+  //     return installationFuse;
+  //   }
+  // };
+  // /*расчет веера*/
+  // const fanCalculation = () => {
+  //   let fan = 0;
 
-    if (frontTarget - frontFP !== 0) {
-      fan = (
-        ((frontTarget - frontFP) / 4 / (0.001 * calculatedRangeСalculation())) *
-        0.01
-      ).toFixed(2);
-    } else {
-      return 'Iв ';
-    }
+  //   if (frontTarget - frontFP !== 0) {
+  //     fan = (
+  //       ((frontTarget - frontFP) / 4 / (0.001 * calculatedRangeСalculation())) *
+  //       0.01
+  //     ).toFixed(2);
+  //   } else {
+  //     return 'Iв ';
+  //   }
 
-    if (frontTarget === '' || frontFP === '') {
-      return 'Iв ';
-    } else if (fan < 0) {
-      return `Iв соед в ${fan * -1}`;
-    } else if (fan != 0) {
-      return `Iв разд в ${fan}`;
-    } else {
-      return 'Iв ';
-    }
-  };
-  /*расчет скачка*/
-  const jumpCalculation = () => {
-    const dXtis = returnDataST().dXtis;
-    let jump = 0;
+  //   if (frontTarget === '' || frontFP === '') {
+  //     return 'Iв ';
+  //   } else if (fan < 0) {
+  //     return `Iв соед в ${fan * -1}`;
+  //   } else if (fan != 0) {
+  //     return `Iв разд в ${fan}`;
+  //   } else {
+  //     return 'Iв ';
+  //   }
+  // };
+  // /*расчет скачка*/
+  // const jumpCalculation = () => {
+  //   const dXtis = returnDataST().dXtis;
+  //   let jump = 0;
 
-    if (depthTarget === '') {
-      jump = 0;
-    } else {
-      jump = Math.round(depthTarget / 3 / dXtis);
-    }
+  //   if (depthTarget === '') {
+  //     jump = 0;
+  //   } else {
+  //     jump = Math.round(depthTarget / 3 / dXtis);
+  //   }
 
-    return `Ск: ${jump}`;
-  };
-  /*расчет интервала веера на орудие*/
-  const intervalFanCalculation = () => {
-    const intervalFan = Math.round((frontTarget - frontFP) / 4);
+  //   return `Ск: ${jump}`;
+  // };
+  // /*расчет интервала веера на орудие*/
+  // const intervalFanCalculation = () => {
+  //   const intervalFan = Math.round((frontTarget - frontFP) / 4);
 
-    if (intervalFan < 0) {
-      return `Iв.ор 0`;
-    } else {
-      return `Iв.ор ${intervalFan}`;
-    }
-  };
-  /*расчет дфльности командира*/
-  const rangeCommanderCalculation = () => {
-    let topographicRange = 0;
+  //   if (intervalFan < 0) {
+  //     return `Iв.ор 0`;
+  //   } else {
+  //     return `Iв.ор ${intervalFan}`;
+  //   }
+  // };
+  // /*расчет дфльности командира*/
+  // const rangeCommanderCalculation = () => {
+  //   let topographicRange = 0;
 
-    if (isVisible) {
-      topographicRange = Math.round(
-        Math.sqrt(
-          Math.pow(coordinateTargetX - coordinateOPX, 2) +
-            Math.pow(coordinateTargetY - coordinateOPY, 2),
-        ),
-      );
-    } else {
-      topographicRange = rangeTarget;
-    }
+  //   if (isVisible) {
+  //     topographicRange = Math.round(
+  //       Math.sqrt(
+  //         Math.pow(coordinateTargetX - coordinateOPX, 2) +
+  //           Math.pow(coordinateTargetY - coordinateOPY, 2),
+  //       ),
+  //     );
+  //   } else {
+  //     topographicRange = rangeTarget;
+  //   }
 
-    return topographicRange;
-  };
-  /*расчет угла командира*/
-  const angleCommanderCalculation = () => {
-    let directionalAngle = 0;
-    let angle = 0;
+  //   return topographicRange;
+  // };
+  // /*расчет угла командира*/
+  // const angleCommanderCalculation = () => {
+  //   let directionalAngle = 0;
+  //   let angle = 0;
 
-    if (isVisible) {
-      directionalAngle =
-        (Math.atan2(
-          coordinateTargetY - coordinateOPY,
-          coordinateTargetX - coordinateOPX,
-        ) *
-          180) /
-        Math.PI /
-        6;
-    } else {
-      directionalAngle = +angleTarget;
-    }
+  //   if (isVisible) {
+  //     directionalAngle =
+  //       (Math.atan2(
+  //         coordinateTargetY - coordinateOPY,
+  //         coordinateTargetX - coordinateOPX,
+  //       ) *
+  //         180) /
+  //       Math.PI /
+  //       6;
+  //   } else {
+  //     directionalAngle = +angleTarget;
+  //   }
 
-    if (directionalAngle < 0) {
-      angle = directionalAngle + 60;
-    } else {
-      angle = directionalAngle;
-    }
+  //   if (directionalAngle < 0) {
+  //     angle = directionalAngle + 60;
+  //   } else {
+  //     angle = directionalAngle;
+  //   }
 
-    return angle.toFixed(2);
-  };
-  /*расчет ПС*/
-  const amendmentDisplacementCalculation = () => {
-    const numberAngle = +angleСalculation();
-    const numberAngleCommander = +angleCommanderCalculation();
-    let amendmentDisplacement = 0;
+  //   return angle.toFixed(2);
+  // };
+  // /*расчет ПС*/
+  // const amendmentDisplacementCalculation = () => {
+  //   const numberAngle = +angleСalculation();
+  //   const numberAngleCommander = +angleCommanderCalculation();
+  //   let amendmentDisplacement = 0;
 
-    if (angleСalculation() - angleCommanderCalculation() < 0) {
-      amendmentDisplacement = (numberAngle - numberAngleCommander) * -1;
-    } else {
-      amendmentDisplacement = numberAngle - numberAngleCommander;
-    }
+  //   if (angleСalculation() - angleCommanderCalculation() < 0) {
+  //     amendmentDisplacement = (numberAngle - numberAngleCommander) * -1;
+  //   } else {
+  //     amendmentDisplacement = numberAngle - numberAngleCommander;
+  //   }
 
-    if (amendmentDisplacement >= 30 && amendmentDisplacement <= 60) {
-      return ((amendmentDisplacement - 60) * -1).toFixed(2);
-    } else {
-      return amendmentDisplacement.toFixed(2);
-    }
-  };
-  /*расчет Ку*/
-  const removalCoefficientCalculation = () => {
-    let removalCoefficient = 0;
+  //   if (amendmentDisplacement >= 30 && amendmentDisplacement <= 60) {
+  //     return ((amendmentDisplacement - 60) * -1).toFixed(2);
+  //   } else {
+  //     return amendmentDisplacement.toFixed(2);
+  //   }
+  // };
+  // /*расчет Ку*/
+  // const removalCoefficientCalculation = () => {
+  //   let removalCoefficient = 0;
 
-    if (rangeCommanderCalculation() === 0 || rangeСalculation() === 0) {
-      removalCoefficient = 0;
-    } else {
-      removalCoefficient = rangeCommanderCalculation() / rangeСalculation();
-    }
+  //   if (rangeCommanderCalculation() === 0 || rangeСalculation() === 0) {
+  //     removalCoefficient = 0;
+  //   } else {
+  //     removalCoefficient = rangeCommanderCalculation() / rangeСalculation();
+  //   }
 
-    return removalCoefficient.toFixed(2);
-  };
-  /*расчет Шу*/
-  const stepAngomerCalculation = () => {
-    let stepAngomer = 0;
+  //   return removalCoefficient.toFixed(2);
+  // };
+  // /*расчет Шу*/
+  // const stepAngomerCalculation = () => {
+  //   let stepAngomer = 0;
 
-    if (amendmentDisplacementCalculation() === 0 || rangeСalculation() === 0) {
-      stepAngomer = 0;
-    } else {
-      stepAngomer = Math.round(
-        (amendmentDisplacementCalculation() * 100) /
-          (0.01 * rangeСalculation()),
-      );
-    }
+  //   if (amendmentDisplacementCalculation() === 0 || rangeСalculation() === 0) {
+  //     stepAngomer = 0;
+  //   } else {
+  //     stepAngomer = Math.round(
+  //       (amendmentDisplacementCalculation() * 100) /
+  //         (0.01 * rangeСalculation()),
+  //     );
+  //   }
 
-    return stepAngomer;
-  };
-  /*определение положения огневой позиции*/
-  const findOutThePositionOfTheFirePosition = () => {
-    let str = '';
+  //   return stepAngomer;
+  // };
+  // /*определение положения огневой позиции*/
+  // const findOutThePositionOfTheFirePosition = () => {
+  //   let str = '';
 
-    if (+angleСalculation() >= 52.2 && +angleСalculation() <= 60) {
-      if (+angleСalculation() > +angleCommanderCalculation() + 60) {
-        str = 'слева';
-      } else {
-        str = 'справа';
-      }
-    } else {
-      if (+angleСalculation() > +angleCommanderCalculation()) {
-        str = 'слева';
-      } else {
-        str = 'справа';
-      }
-    }
+  //   if (+angleСalculation() >= 52.2 && +angleСalculation() <= 60) {
+  //     if (+angleСalculation() > +angleCommanderCalculation() + 60) {
+  //       str = 'слева';
+  //     } else {
+  //       str = 'справа';
+  //     }
+  //   } else {
+  //     if (+angleСalculation() > +angleCommanderCalculation()) {
+  //       str = 'слева';
+  //     } else {
+  //       str = 'справа';
+  //     }
+  //   }
 
-    return str;
-  };
-  /*рассчет 8Вд, 4Вд, 2Вд*/
-  const vdInAim = a => {
-    const aim = Math.round((returnDataST().Vd * a) / returnDataST().dXtis);
+  //   return str;
+  // };
+  // /*рассчет 8Вд, 4Вд, 2Вд*/
+  // const vdInAim = a => {
+  //   const aim = Math.round((returnDataST().Vd * a) / returnDataST().dXtis);
 
-    if (returnDataST().Vd != 0 || returnDataST().dXtis != 0) {
-      return aim;
-    } else {
-      return 0;
-    }
-  };
-  /*рассчет корректуры по Дк и УГк*/
-  const proofreadingCalculationFirst = () => {
-    let proofreadingInAim = 0;
-    let proofreadingInAngle = 0;
+  //   if (returnDataST().Vd != 0 || returnDataST().dXtis != 0) {
+  //     return aim;
+  //   } else {
+  //     return 0;
+  //   }
+  // };
+  // /*рассчет корректуры по Дк и УГк*/
+  // const proofreadingCalculationFirst = () => {
+  //   let proofreadingInAim = 0;
+  //   let proofreadingInAngle = 0;
 
-    const coordinateX = +coordinateOPX;
-    const coordinateY = +coordinateOPY;
-    const angle = +angleBurst;
+  //   const coordinateX = +coordinateOPX;
+  //   const coordinateY = +coordinateOPY;
+  //   const angle = +angleBurst;
 
-    const burstX = Math.round(
-      coordinateX + rangeBurst * Math.cos(angle * 6 * (Math.PI / 180)),
-    );
-    const burstY = Math.round(
-      coordinateY + rangeBurst * Math.sin(angle * 6 * (Math.PI / 180)),
-    );
+  //   const burstX = Math.round(
+  //     coordinateX + rangeBurst * Math.cos(angle * 6 * (Math.PI / 180)),
+  //   );
+  //   const burstY = Math.round(
+  //     coordinateY + rangeBurst * Math.sin(angle * 6 * (Math.PI / 180)),
+  //   );
 
-    const topographicRangeBurst = Math.round(
-      Math.sqrt(
-        Math.pow(burstX - coordinateFPX, 2) +
-          Math.pow(burstY - coordinateFPY, 2),
-      ),
-    );
+  //   const topographicRangeBurst = Math.round(
+  //     Math.sqrt(
+  //       Math.pow(burstX - coordinateFPX, 2) +
+  //         Math.pow(burstY - coordinateFPY, 2),
+  //     ),
+  //   );
 
-    const directionalAngle =
-      (Math.atan2(burstY - coordinateFPY, burstX - coordinateFPX) * 180) /
-      Math.PI /
-      6;
+  //   const directionalAngle =
+  //     (Math.atan2(burstY - coordinateFPY, burstX - coordinateFPX) * 180) /
+  //     Math.PI /
+  //     6;
 
-    let angleFPInBurst = 0;
-    let directionAlngle = 0;
+  //   let angleFPInBurst = 0;
+  //   let directionAlngle = 0;
 
-    if (directionalAngle < 0) {
-      angleFPInBurst = directionalAngle + 60;
-    } else {
-      angleFPInBurst = directionalAngle;
-    }
+  //   if (directionalAngle < 0) {
+  //     angleFPInBurst = directionalAngle + 60;
+  //   } else {
+  //     angleFPInBurst = directionalAngle;
+  //   }
 
-    if (angleFPInBurst >= 52.5 && angleFPInBurst <= 60) {
-      directionAlngle = angleFPInBurst - mainStream - 60;
-    } else {
-      directionAlngle = angleFPInBurst - mainStream;
-    }
+  //   if (angleFPInBurst >= 52.5 && angleFPInBurst <= 60) {
+  //     directionAlngle = angleFPInBurst - mainStream - 60;
+  //   } else {
+  //     directionAlngle = angleFPInBurst - mainStream;
+  //   }
 
-    if (rangeBurst === '' || angleBurst === '') {
-      proofreadingInAngle = 0;
-      proofreadingInAim = 0;
-    } else {
-      if (trajectory.toLocaleLowerCase() === 'н') {
-        proofreadingInAim = Math.round(
-          (rangeСalculation() - topographicRangeBurst) / returnDataST().dXtis,
-        );
-      } else {
-        proofreadingInAim = Math.round(
-          ((rangeСalculation() - topographicRangeBurst) /
-            returnDataST().dXtis) *
-            -1,
-        );
-      }
+  //   if (rangeBurst === '' || angleBurst === '') {
+  //     proofreadingInAngle = 0;
+  //     proofreadingInAim = 0;
+  //   } else {
+  //     if (trajectory.toLocaleLowerCase() === 'н') {
+  //       proofreadingInAim = Math.round(
+  //         (rangeСalculation() - topographicRangeBurst) / returnDataST().dXtis,
+  //       );
+  //     } else {
+  //       proofreadingInAim = Math.round(
+  //         ((rangeСalculation() - topographicRangeBurst) /
+  //           returnDataST().dXtis) *
+  //           -1,
+  //       );
+  //     }
 
-      proofreadingInAngle = (
-        angleFromMainStreamСalculation() - directionAlngle
-      ).toFixed(2);
-    }
-    return {proofreadingInAngle, proofreadingInAim};
-  };
-  /*рассчет корректуры ПКсс*/
-  const proofreadingCalculationSecond = () => {
-    let proofreadingInAim = 0;
-    let proofreadingInAngle = 0;
-    let targetX = 0;
-    let targetY = 0;
-    const coordinateX = +coordinateOPX;
-    const coordinateY = +coordinateOPY;
-    const angle = +angleTarget;
+  //     proofreadingInAngle = (
+  //       angleFromMainStreamСalculation() - directionAlngle
+  //     ).toFixed(2);
+  //   }
+  //   return {proofreadingInAngle, proofreadingInAim};
+  // };
+  // /*рассчет корректуры ПКсс*/
+  // const proofreadingCalculationSecond = () => {
+  //   let proofreadingInAim = 0;
+  //   let proofreadingInAngle = 0;
+  //   let targetX = 0;
+  //   let targetY = 0;
+  //   const coordinateX = +coordinateOPX;
+  //   const coordinateY = +coordinateOPY;
+  //   const angle = +angleTarget;
 
-    if (isVisible) {
-      targetX = +coordinateTargetX;
-      targetY = +coordinateTargetY;
-    } else {
-      targetX = Math.round(
-        coordinateX + rangeTarget * Math.cos(angle * 6 * (Math.PI / 180)),
-      );
-      targetY = Math.round(
-        coordinateY + rangeTarget * Math.sin(angle * 6 * (Math.PI / 180)),
-      );
-    }
+  //   if (isVisible) {
+  //     targetX = +coordinateTargetX;
+  //     targetY = +coordinateTargetY;
+  //   } else {
+  //     targetX = Math.round(
+  //       coordinateX + rangeTarget * Math.cos(angle * 6 * (Math.PI / 180)),
+  //     );
+  //     targetY = Math.round(
+  //       coordinateY + rangeTarget * Math.sin(angle * 6 * (Math.PI / 180)),
+  //     );
+  //   }
 
-    const burstX = +targetX + +north - +south;
-    const burstY = +targetY + +east - +west;
+  //   const burstX = +targetX + +north - +south;
+  //   const burstY = +targetY + +east - +west;
 
-    const topographicRangeBurst = Math.round(
-      Math.sqrt(
-        Math.pow(burstX - coordinateFPX, 2) +
-          Math.pow(burstY - coordinateFPY, 2),
-      ),
-    );
+  //   const topographicRangeBurst = Math.round(
+  //     Math.sqrt(
+  //       Math.pow(burstX - coordinateFPX, 2) +
+  //         Math.pow(burstY - coordinateFPY, 2),
+  //     ),
+  //   );
 
-    const directionalAngle =
-      (Math.atan2(burstY - coordinateFPY, burstX - coordinateFPX) * 180) /
-      Math.PI /
-      6;
+  //   const directionalAngle =
+  //     (Math.atan2(burstY - coordinateFPY, burstX - coordinateFPX) * 180) /
+  //     Math.PI /
+  //     6;
 
-    let angleFPInBurst = 0;
-    let directionAlngle = 0;
+  //   let angleFPInBurst = 0;
+  //   let directionAlngle = 0;
 
-    if (directionalAngle < 0) {
-      angleFPInBurst = directionalAngle + 60;
-    } else {
-      angleFPInBurst = directionalAngle;
-    }
+  //   if (directionalAngle < 0) {
+  //     angleFPInBurst = directionalAngle + 60;
+  //   } else {
+  //     angleFPInBurst = directionalAngle;
+  //   }
 
-    if (angleFPInBurst >= 52.5 && angleFPInBurst <= 60) {
-      directionAlngle = angleFPInBurst - mainStream - 60;
-    } else {
-      directionAlngle = angleFPInBurst - mainStream;
-    }
+  //   if (angleFPInBurst >= 52.5 && angleFPInBurst <= 60) {
+  //     directionAlngle = angleFPInBurst - mainStream - 60;
+  //   } else {
+  //     directionAlngle = angleFPInBurst - mainStream;
+  //   }
 
-    if (rangeСalculation() === 0 || returnDataST().dXtis === 0) {
-      proofreadingInAngle = 0;
-      proofreadingInAim = 0;
-    } else {
-      if (trajectory.toLocaleLowerCase() === 'н') {
-        proofreadingInAim = Math.round(
-          (rangeСalculation() - topographicRangeBurst) / returnDataST().dXtis,
-        );
-      } else {
-        proofreadingInAim = Math.round(
-          ((rangeСalculation() - topographicRangeBurst) /
-            returnDataST().dXtis) *
-            -1,
-        );
-      }
+  //   if (rangeСalculation() === 0 || returnDataST().dXtis === 0) {
+  //     proofreadingInAngle = 0;
+  //     proofreadingInAim = 0;
+  //   } else {
+  //     if (trajectory.toLocaleLowerCase() === 'н') {
+  //       proofreadingInAim = Math.round(
+  //         (rangeСalculation() - topographicRangeBurst) / returnDataST().dXtis,
+  //       );
+  //     } else {
+  //       proofreadingInAim = Math.round(
+  //         ((rangeСalculation() - topographicRangeBurst) /
+  //           returnDataST().dXtis) *
+  //           -1,
+  //       );
+  //     }
 
-      proofreadingInAngle = (
-        angleFromMainStreamСalculation() - directionAlngle
-      ).toFixed(2);
-    }
+  //     proofreadingInAngle = (
+  //       angleFromMainStreamСalculation() - directionAlngle
+  //     ).toFixed(2);
+  //   }
 
-    return {proofreadingInAngle, proofreadingInAim};
-  };
-  /*преобразовать точку в пробел */
-  const replaceAngle = angle => {
-    const reg = /\./;
-    const str = angle.toString();
-    const newStr = str.replace(reg, '-');
+  //   return {proofreadingInAngle, proofreadingInAim};
+  // };
+  // /*преобразовать точку в пробел */
+  // const replaceAngle = angle => {
+  //   const reg = /\./;
+  //   const str = angle.toString();
+  //   const newStr = str.replace(reg, '-');
 
-    return newStr;
-  };
+  //   return newStr;
+  // };
 
   const hendlerIsVisible = () => {
     setIsVisible(!isVisible);
   };
 
-  const addTargets = () => {
-    const target = {
-      id: targets.length,
-      coordinateTargetX,
-      coordinateTargetY,
-      heightTarget,
-      rangeTarget,
-      angleTarget,
-      verticalAngleTarget,
-      numberTarget,
-      nameTarget,
-      frontTarget,
-      depthTarget,
-    };
-    setTargets([...targets, target]);
-  };
-  const clearTargetInput = () => {
-    setCoordinateTargetX('');
-    setCoordinateTargetY('');
-    setHeightTarget('');
-    setRangeTarget('');
-    setAngleTarget('');
-    setVerticalAngleTarget('');
-    setNumberTarget('');
-    setNameTarget('');
-    setFrontTarget('');
-    setDepthTarget('');
-  };
+  // const addTargets = () => {
+  //   const target = {
+  //     id: targets.length,
+  //     coordinateTargetX,
+  //     coordinateTargetY,
+  //     heightTarget,
+  //     rangeTarget,
+  //     angleTarget,
+  //     verticalAngleTarget,
+  //     numberTarget,
+  //     nameTarget,
+  //     frontTarget,
+  //     depthTarget,
+  //   };
+  //   setTargets([...targets, target]);
+  // };
 
-  React.useEffect(() => {
-    if (targets.length > 0) {
-      setCoordinateTargetX(targets[targetsIndex].coordinateTargetX);
-      setCoordinateTargetY(targets[targetsIndex].coordinateTargetY);
-      setHeightTarget(targets[targetsIndex].heightTarget);
-      setRangeTarget(targets[targetsIndex].rangeTarget);
-      setAngleTarget(targets[targetsIndex].angleTarget);
-      setVerticalAngleTarget(targets[targetsIndex].verticalAngleTarget);
-      setNumberTarget(targets[targetsIndex].numberTarget);
-      setNameTarget(targets[targetsIndex].nameTarget);
-      setFrontTarget(targets[targetsIndex].frontTarget);
-      setDepthTarget(targets[targetsIndex].depthTarget);
-    }
-  }, [targetsIndex]);
+  // const clearTargetInput = () => {
+  //   setCoordinateTargetX('');
+  //   setCoordinateTargetY('');
+  //   setHeightTarget('');
+  //   setRangeTarget('');
+  //   setAngleTarget('');
+  //   setVerticalAngleTarget('');
+  //   setNumberTarget('');
+  //   setNameTarget('');
+  //   setFrontTarget('');
+  //   setDepthTarget('');
+  // };
+
+  // React.useEffect(() => {
+  //   if (targets.length > 0) {
+  //     setCoordinateTargetX(targets[targetsIndex].coordinateTargetX);
+  //     setCoordinateTargetY(targets[targetsIndex].coordinateTargetY);
+  //     setHeightTarget(targets[targetsIndex].heightTarget);
+  //     setRangeTarget(targets[targetsIndex].rangeTarget);
+  //     setAngleTarget(targets[targetsIndex].angleTarget);
+  //     setVerticalAngleTarget(targets[targetsIndex].verticalAngleTarget);
+  //     setNumberTarget(targets[targetsIndex].numberTarget);
+  //     setNameTarget(targets[targetsIndex].nameTarget);
+  //     setFrontTarget(targets[targetsIndex].frontTarget);
+  //     setDepthTarget(targets[targetsIndex].depthTarget);
+  //   }
+  // }, [targetsIndex]);
 
   return (
     <>
       {!isLoading && (
         <ScrollView>
           <ModalBlock
-            angle={angleСalculation()}
-            heightFP={heightFP}
-            rangeСalculation={rangeСalculation()}
-            trajectory={trajectory}
-            nameChargePrimary={nameCharge}
+            // angle={angleСalculation()}
+            // rangeСalculation={rangeСalculation()}
+            // heightFP={heightFP}
+            trajectory={basicData.trajectory}
+            nameChargePrimary={basicData.nameCharge}
           />
-          <SelectDropdown
-            buttonStyle={{
-              backgroundColor: '#576644',
-              width: '49%',
-              height: 45,
-              paddingLeft: 10,
-              fontSize: 18,
-              marginTop: 15,
-            }}
-            data={fuse.map(item => item.fuseName)}
-            onSelect={(selectedItem, index) => {
-              setFuseName({fuse: selectedItem, id: index});
-            }}
-            buttonTextAfterSelection={(selectedItem, index) => {
-              return selectedItem;
-            }}
-            rowTextForSelection={(item, index) => {
-              return item;
-            }}
-            defaultButtonText={'Взрыватель'}
-            defaultValueByIndex={fuseName.id}
-          />
-          <View style={styles.container}>
-            {/* Вхлдные данные */}
-            <BasicData
-              mainStream={mainStream}
-              setMainStream={setMainStream}
-              frontFP={frontFP}
-              setFrontFP={setFrontFP}
-              trajectory={trajectory}
-              setTrajectory={setTrajectory}
-              nameCharge={nameCharge}
-              setNameCharge={setNameCharge}
-              charges={charges}
-              trajectories={trajectories}
-            />
+          <View>
+            {/* Вхoдные данные */}
+            <BasicData value={basicData} setValue={changeBasicData} />
             {/* КНП */}
-            <ObservationPost
-              coordinateOPX={coordinateOPX}
-              setCoordinateOPX={setCoordinateOPX}
-              coordinateOPY={coordinateOPY}
-              setCoordinateOPY={setCoordinateOPY}
-              heightOP={heightOP}
-              setHeightOP={setHeightOP}
-            />
-            {/* Огневая*/}
-            <FirePosition
-              coordinateFPX={coordinateFPX}
-              setCoordinateFPX={setCoordinateFPX}
-              coordinateFPY={coordinateFPY}
-              setCoordinateFPY={setCoordinateFPY}
-              heightFP={heightFP}
-              setHeightFP={setHeightFP}
-            />
+            <ObservationPost value={OPData} setValue={changeOPData} />
+            {/* Огневая */}
+            <FirePosition value={FPData} setValue={changeFPData} />
             <SwitchBlock
               isVisible={isVisible}
               hendlerIsVisible={hendlerIsVisible}
             />
             {/* Цель */}
-            <View
+            {/* <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
@@ -1055,8 +991,8 @@ const BatteryCommander = () => {
                 }}>
                 <Text style={{fontSize: 18}}>Очистить цели</Text>
               </TouchableOpacity>
-            </View>
-            {isVisible ? (
+            </View> */}
+            {/* {isVisible ? (
               <>
                 <RectangularCoordinates
                   coordinateTargetX={coordinateTargetX}
@@ -1078,9 +1014,9 @@ const BatteryCommander = () => {
                   setVerticalAngleTarget={setVerticalAngleTarget}
                 />
               </>
-            )}
+            )} */}
             {/* Цель */}
-            <DescriptionTarget
+            {/* <DescriptionTarget
               numberTarget={numberTarget}
               setNumberTarget={setNumberTarget}
               nameTarget={nameTarget}
@@ -1093,8 +1029,8 @@ const BatteryCommander = () => {
               setAmendmentRange={setAmendmentRange}
               amendmentAngle={amendmentAngle}
               setAmendmentAngle={setAmendmentAngle}
-            />
-            <TouchableOpacity
+            /> */}
+            {/* <TouchableOpacity
               disabled={numberTarget.length === 0}
               onPress={() => {
                 addTargets();
@@ -1105,9 +1041,9 @@ const BatteryCommander = () => {
                 style={{color: '#ffffff', fontSize: 22, fontWeight: 'bold'}}>
                 Стой! Записать
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             {/* Установки */}
-            <View style={styles.answerWrapper}>
+            {/* <View style={styles.answerWrapper}>
               <View
                 style={{
                   width: '37%',
@@ -1232,9 +1168,9 @@ const BatteryCommander = () => {
                   {`Тпол: ${returnDataST().time}`}
                 </Text>
               </View>
-            </View>
+            </View> */}
             {/* Данные для расчета корректур */}
-            <Text
+            {/* <Text
               style={{
                 textAlign: 'center',
                 fontSize: 30,
@@ -1242,8 +1178,8 @@ const BatteryCommander = () => {
                 marginBottom: 15,
               }}>
               Данные для расчета корректур
-            </Text>
-            <View
+            </Text> */}
+            {/* <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -1344,9 +1280,9 @@ const BatteryCommander = () => {
                 }}>
                 {`2Вд: ΔП=${vdInAim(2)}`}
               </Text>
-            </View>
+            </View> */}
             {/* Рассчет коррекур */}
-            <Text
+            {/* <Text
               style={{
                 textAlign: 'center',
                 fontSize: 30,
@@ -1354,8 +1290,8 @@ const BatteryCommander = () => {
                 marginBottom: 15,
               }}>
               Расчет корректур (Др,&nbsp; УГр)
-            </Text>
-            <View style={styles.wrapper}>
+            </Text> */}
+            {/* <View style={styles.wrapper}>
               <View style={styles.inputWrapper}>
                 <>{rangeBurst && <Text style={styles.label}>Др:</Text>}</>
                 <TextInput
@@ -1398,8 +1334,8 @@ const BatteryCommander = () => {
                   )}
                 </>
               </View>
-            </View>
-            <View style={styles.answerWrapper}>
+            </View> */}
+            {/* <View style={styles.answerWrapper}>
               <Text
                 style={{
                   color: '#750000',
@@ -1418,9 +1354,9 @@ const BatteryCommander = () => {
                   proofreadingCalculationFirst().proofreadingInAngle,
                 )}`}
               </Text>
-            </View>
+            </View> */}
             {/* Рассчет коррекур */}
-            <Text
+            {/* <Text
               style={{
                 textAlign: 'center',
                 fontSize: 30,
@@ -1429,8 +1365,8 @@ const BatteryCommander = () => {
                 marginTop: 20,
               }}>
               Расчет корректур (ПКСС)
-            </Text>
-            <View style={styles.wrapper}>
+            </Text> */}
+            {/* <View style={styles.wrapper}>
               <View style={styles.inputWrapper}>
                 <>{north && <Text style={styles.label}>С:</Text>}</>
                 <TextInput
@@ -1515,8 +1451,8 @@ const BatteryCommander = () => {
                   )}
                 </>
               </View>
-            </View>
-            <View style={styles.answerWrapper}>
+            </View> */}
+            {/* <View style={styles.answerWrapper}>
               <Text
                 style={{
                   color: '#750000',
@@ -1535,7 +1471,7 @@ const BatteryCommander = () => {
                   proofreadingCalculationSecond().proofreadingInAngle,
                 )}`}
               </Text>
-            </View>
+            </View> */}
           </View>
         </ScrollView>
       )}
