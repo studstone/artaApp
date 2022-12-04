@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
 import Cancel from '../image/cancel.png';
 
 export default React.memo(function Input({

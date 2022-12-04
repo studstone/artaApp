@@ -16,10 +16,9 @@ import ModalBlock from '../components/Modal';
 import BasicData from '../components/BasicData';
 import ObservationPost from '../components/ObservationPost';
 import FirePosition from '../components/FirePosition';
-import SwitchBlock from '../components/SwitchBlock';
-import RectangularCoordinates from '../components/RectangularCoordinates';
-import PolarCoordinates from '../components/PolarCoordinates';
 import DescriptionTarget from '../components/DescriptionTarget';
+import TargetsList from '../components/TargetsList';
+import CoordinatsVariant from '../components/CoordinatsVariant';
 
 import shotingTables from '../DB/shotingTables';
 import Cancel from '../image/cancel.png';
@@ -44,39 +43,31 @@ const initFPData = {
   heightFP: '',
 };
 
-// const targetData = {
-//   coordinateTargetX: '',
-//   coordinateTargetY: '',
-//   heightTarget: '',
-//   rangeTarget: '',
-//   verticalAngleTarget: '',
-//   numberTarget: '',
-//   frontTarget: '',
-//   depthTarget: '',
-// };
+const initTargetData = {
+  coordinateVariant: true,
+  coordinateTargetX: '',
+  coordinateTargetY: '',
+  heightTarget: '',
+  rangeTarget: '',
+  angleTarget: '',
+  verticalAngleTarget: '',
+  numberTarget: '',
+  nameTarget: '',
+  frontTarget: '',
+  depthTarget: '',
+  amendmentRange: '',
+  amendmentAngle: '',
+};
 
 const BatteryCommander = () => {
-  const [targets, setTargets] = React.useState([]);
-  const [targetsIndex, setTargetsIndex] = React.useState('');
-
   const [basicData, setBasicData] = React.useState({...initBasicData});
   const [OPData, setOPData] = React.useState({...initOPData});
   const [FPData, setFPData] = React.useState({...initFPData});
 
-  const [coordinateFPX, setCoordinateFPX] = React.useState('');
-  const [coordinateFPY, setCoordinateFPY] = React.useState('');
-  const [heightFP, setHeightFP] = React.useState('');
+  const [targets, setTargets] = React.useState([]);
+  const [activeTarget, setActiveTarget] = React.useState(null);
 
-  const [coordinateTargetX, setCoordinateTargetX] = React.useState('');
-  const [coordinateTargetY, setCoordinateTargetY] = React.useState('');
-  const [heightTarget, setHeightTarget] = React.useState('');
-  const [rangeTarget, setRangeTarget] = React.useState('');
-  const [angleTarget, setAngleTarget] = React.useState('');
-  const [verticalAngleTarget, setVerticalAngleTarget] = React.useState('');
-  const [numberTarget, setNumberTarget] = React.useState('');
-  const [nameTarget, setNameTarget] = React.useState('');
-  const [frontTarget, setFrontTarget] = React.useState('');
-  const [depthTarget, setDepthTarget] = React.useState('');
+  const [targetData, setTargetData] = React.useState({...initTargetData});
 
   const [rangeBurst, setRangeBurst] = React.useState('');
   const [angleBurst, setAngleBurst] = React.useState('');
@@ -89,59 +80,48 @@ const BatteryCommander = () => {
   const [east, setEast] = React.useState('');
   const [west, setWest] = React.useState('');
 
-  const [amendmentRange, setAmendmentRange] = React.useState('');
-  const [amendmentAngle, setAmendmentAngle] = React.useState('');
-
   const [isVisible, setIsVisible] = React.useState(true);
   const [isLoading, setIsLoading] = React.useState(true);
 
-  const changeBasicData = (key, value) => {
-    setBasicData(prev => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+  const changeBasicData = React.useCallback(
+    (key, value) => {
+      setBasicData(prev => ({
+        ...prev,
+        [key]: value,
+      }));
+    },
+    [basicData],
+  );
 
-  const changeOPData = (key, value) => {
-    setOPData(prev => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+  const changeOPData = React.useCallback(
+    (key, value) => {
+      setOPData(prev => ({
+        ...prev,
+        [key]: value,
+      }));
+    },
+    [OPData],
+  );
 
-  const changeFPData = (key, value) => {
-    setFPData(prev => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+  const changeFPData = React.useCallback(
+    (key, value) => {
+      setFPData(prev => ({
+        ...prev,
+        [key]: value,
+      }));
+    },
+    [FPData],
+  );
 
-  const obj = {
-    targets,
-    targetsIndex,
-    basicData,
-    OPData,
-    FPData,
-    coordinateTargetX,
-    coordinateTargetY,
-    heightTarget,
-    rangeTarget,
-    angleTarget,
-    verticalAngleTarget,
-    numberTarget,
-    nameTarget,
-    frontTarget,
-    depthTarget,
-    rangeBurst,
-    angleBurst,
-    north,
-    south,
-    east,
-    west,
-    amendmentRange,
-    amendmentAngle,
-    isVisible,
-  };
+  const changeTargetData = React.useCallback(
+    (key, value) => {
+      setTargetData(prev => ({
+        ...prev,
+        [key]: value,
+      }));
+    },
+    [targetData],
+  );
 
   React.useEffect(() => {
     setIsLoading(true);
@@ -150,62 +130,19 @@ const BatteryCommander = () => {
 
   React.useEffect(() => {
     storeData();
-  }, [
-    targets,
-    targetsIndex,
-    basicData,
-    OPData,
-    FPData,
-    coordinateTargetX,
-    coordinateTargetY,
-    heightTarget,
-    rangeTarget,
-    angleTarget,
-    verticalAngleTarget,
-    numberTarget,
-    nameTarget,
-    frontTarget,
-    depthTarget,
-    rangeBurst,
-    angleBurst,
-    north,
-    south,
-    east,
-    west,
-    amendmentRange,
-    amendmentAngle,
-    isVisible,
-  ]);
+  }, [basicData, OPData, FPData, targetData, targets, activeTarget]);
 
   const getData = async () => {
     try {
       const jsonValue = await AsyncStorage.getItem('data');
       if (jsonValue !== null) {
         const data = JSON.parse(jsonValue);
-        setTargets(data.targets);
-        setTargetsIndex(data.targetsIndex);
         setBasicData(data.basicData);
         setOPData(data.OPData);
         setFPData(data.FPData);
-        setCoordinateTargetX(data.coordinateTargetX);
-        setCoordinateTargetY(data.coordinateTargetY);
-        setHeightTarget(data.heightTarget);
-        setRangeTarget(data.rangeTarget);
-        setAngleTarget(data.angleTarget);
-        setVerticalAngleTarget(data.verticalAngleTarget);
-        setNumberTarget(data.numberTarget);
-        setNameTarget(data.nameTarget);
-        setFrontTarget(data.frontTarget);
-        setDepthTarget(data.depthTarget);
-        setRangeBurst(data.rangeBurst);
-        setAngleBurst(data.angleBurst);
-        setNorth(data.north);
-        setSouth(data.south);
-        setEast(data.east);
-        setWest(data.west);
-        setAmendmentRange(data.amendmentRange);
-        setAmendmentAngle(data.amendmentAngle);
-        setIsVisible(data.isVisible);
+        setTargetData(data.targetData);
+        setTargets(data.targets);
+        setActiveTarget(data.activeTarget);
       }
       setIsLoading(false);
     } catch (e) {
@@ -214,6 +151,14 @@ const BatteryCommander = () => {
   };
 
   const storeData = async () => {
+    const obj = {
+      basicData,
+      OPData,
+      FPData,
+      targetData,
+      targets,
+      activeTarget,
+    };
     try {
       const jsonValue = JSON.stringify(obj);
       await AsyncStorage.setItem('data', jsonValue);
@@ -873,54 +818,23 @@ const BatteryCommander = () => {
   //   return newStr;
   // };
 
-  const hendlerIsVisible = () => {
-    setIsVisible(!isVisible);
+  const onChangeActiveTarget = value => {
+    setActiveTarget(value);
+    setTargetData(targets[value]);
   };
 
-  // const addTargets = () => {
-  //   const target = {
-  //     id: targets.length,
-  //     coordinateTargetX,
-  //     coordinateTargetY,
-  //     heightTarget,
-  //     rangeTarget,
-  //     angleTarget,
-  //     verticalAngleTarget,
-  //     numberTarget,
-  //     nameTarget,
-  //     frontTarget,
-  //     depthTarget,
-  //   };
-  //   setTargets([...targets, target]);
-  // };
+  const addTargets = () => {
+    setTargets(prev => [...prev, targetData]);
+    setTargetData(prev => ({
+      ...initTargetData,
+      coordinateVariant: prev.coordinateVariant,
+    }));
+  };
 
-  // const clearTargetInput = () => {
-  //   setCoordinateTargetX('');
-  //   setCoordinateTargetY('');
-  //   setHeightTarget('');
-  //   setRangeTarget('');
-  //   setAngleTarget('');
-  //   setVerticalAngleTarget('');
-  //   setNumberTarget('');
-  //   setNameTarget('');
-  //   setFrontTarget('');
-  //   setDepthTarget('');
-  // };
-
-  // React.useEffect(() => {
-  //   if (targets.length > 0) {
-  //     setCoordinateTargetX(targets[targetsIndex].coordinateTargetX);
-  //     setCoordinateTargetY(targets[targetsIndex].coordinateTargetY);
-  //     setHeightTarget(targets[targetsIndex].heightTarget);
-  //     setRangeTarget(targets[targetsIndex].rangeTarget);
-  //     setAngleTarget(targets[targetsIndex].angleTarget);
-  //     setVerticalAngleTarget(targets[targetsIndex].verticalAngleTarget);
-  //     setNumberTarget(targets[targetsIndex].numberTarget);
-  //     setNameTarget(targets[targetsIndex].nameTarget);
-  //     setFrontTarget(targets[targetsIndex].frontTarget);
-  //     setDepthTarget(targets[targetsIndex].depthTarget);
-  //   }
-  // }, [targetsIndex]);
+  const clearTargets = () => {
+    setTargets([]);
+    setTargetData({...initTargetData});
+  };
 
   return (
     <>
@@ -940,108 +854,24 @@ const BatteryCommander = () => {
             <ObservationPost value={OPData} setValue={changeOPData} />
             {/* Огневая */}
             <FirePosition value={FPData} setValue={changeFPData} />
-            <SwitchBlock
-              isVisible={isVisible}
-              hendlerIsVisible={hendlerIsVisible}
+            <TargetsList
+              data={targets}
+              active={activeTarget}
+              setActive={onChangeActiveTarget}
+              clear={clearTargets}
             />
+            <CoordinatsVariant value={targetData} setValue={changeTargetData} />
             {/* Цель */}
-            {/* <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginTop: 15,
-                flexWrap: 'wrap',
-              }}>
-              <SelectDropdown
-                buttonStyle={{
-                  backgroundColor: '#576644',
-                  width: '49%',
-                  height: 45,
-                  paddingLeft: 10,
-                  fontSize: 18,
-                }}
-                data={targets.map(
-                  item => `Ц-${item.numberTarget} ${item.nameTarget}`,
-                )}
-                onSelect={(selectedItem, index) => {
-                  setTargetsIndex(index);
-                }}
-                buttonTextAfterSelection={(selectedItem, index) => {
-                  return selectedItem;
-                }}
-                rowTextForSelection={(item, index) => {
-                  return item;
-                }}
-                defaultButtonText={'Цели'}
-                defaultValueByIndex={targetsIndex}
-              />
-              <TouchableOpacity
-                onPress={() => {
-                  setTargets([]);
-                  setTargetsIndex('');
-                  clearTargetInput();
-                }}
-                style={{
-                  backgroundColor: '#7e8d3b',
-                  width: '49%',
-                  borderRadius: 5,
-                  height: 45,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Text style={{fontSize: 18}}>Очистить цели</Text>
-              </TouchableOpacity>
-            </View> */}
-            {/* {isVisible ? (
-              <>
-                <RectangularCoordinates
-                  coordinateTargetX={coordinateTargetX}
-                  setCoordinateTargetX={setCoordinateTargetX}
-                  coordinateTargetY={coordinateTargetY}
-                  setCoordinateTargetY={setCoordinateTargetY}
-                  heightTarget={heightTarget}
-                  setHeightTarget={setHeightTarget}
-                />
-              </>
-            ) : (
-              <>
-                <PolarCoordinates
-                  rangeTarget={rangeTarget}
-                  setRangeTarget={setRangeTarget}
-                  angleTarget={angleTarget}
-                  setAngleTarget={setAngleTarget}
-                  verticalAngleTarget={verticalAngleTarget}
-                  setVerticalAngleTarget={setVerticalAngleTarget}
-                />
-              </>
-            )} */}
-            {/* Цель */}
-            {/* <DescriptionTarget
-              numberTarget={numberTarget}
-              setNumberTarget={setNumberTarget}
-              nameTarget={nameTarget}
-              setNameTarget={setNameTarget}
-              frontTarget={frontTarget}
-              setFrontTarget={setFrontTarget}
-              depthTarget={depthTarget}
-              setDepthTarget={setDepthTarget}
-              amendmentRange={amendmentRange}
-              setAmendmentRange={setAmendmentRange}
-              amendmentAngle={amendmentAngle}
-              setAmendmentAngle={setAmendmentAngle}
-            /> */}
-            {/* <TouchableOpacity
-              disabled={numberTarget.length === 0}
-              onPress={() => {
-                addTargets();
-                clearTargetInput();
-              }}
+            <DescriptionTarget value={targetData} setValue={changeTargetData} />
+            <TouchableOpacity
+              disabled={targetData.numberTarget.length === 0}
+              onPress={addTargets}
               style={styles.buttonStop}>
               <Text
                 style={{color: '#ffffff', fontSize: 22, fontWeight: 'bold'}}>
-                Стой! Записать
+                Стой! Записать!
               </Text>
-            </TouchableOpacity> */}
+            </TouchableOpacity>
             {/* Установки */}
             {/* <View style={styles.answerWrapper}>
               <View

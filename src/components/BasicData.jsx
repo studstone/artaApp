@@ -1,29 +1,29 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown';
 
 import Input from './Input';
 
 const fuse = [
-  {fuseName: 'РГМ-2М', id: 0},
-  {fuseName: 'В-90', id: 1},
-  {fuseName: 'Т-7', id: 2},
-  {fuseName: 'Т-90', id: 3},
-  {fuseName: 'ДТМ-75', id: 4},
+  {text: 'РГМ-2М', id: 0},
+  {text: 'В-90', id: 1},
+  {text: 'Т-7', id: 2},
+  {text: 'Т-90', id: 3},
+  {text: 'ДТМ-75', id: 4},
 ];
 
 const charges = [
-  {charge: 'п', id: 0},
-  {charge: 'у', id: 1},
-  {charge: 1, id: 2},
-  {charge: 2, id: 3},
-  {charge: 3, id: 4},
-  {charge: 4, id: 5},
+  {text: 'п', id: 0},
+  {text: 'у', id: 1},
+  {text: 1, id: 2},
+  {text: 2, id: 3},
+  {text: 3, id: 4},
+  {text: 4, id: 5},
 ];
 
 const trajectories = [
-  {trajectory: 'н', id: 0},
-  {trajectory: 'м', id: 1},
+  {text: 'н', id: 0},
+  {text: 'м', id: 1},
 ];
 
 const inputs = {
@@ -39,38 +39,41 @@ const inputs = {
   },
 };
 
+const selects = {
+  fuseName: {
+    data: fuse,
+    defaultButtonText: 'Взрыватель',
+  },
+  trajectory: {
+    data: trajectories,
+    defaultButtonText: 'Траектория',
+  },
+  nameCharge: {
+    data: charges,
+    defaultButtonText: 'Заряд',
+  },
+};
+
 export default React.memo(function BasicData({value, setValue}) {
   return (
     <View style={styles.wrapper}>
-      <View style={{width: '100%'}}>
-        <SelectDropdown
-          buttonStyle={styles.select}
-          data={fuse.map(item => item.fuseName)}
-          onSelect={selectedItem => {
-            setValue('fuseName', selectedItem);
-          }}
-          defaultButtonText={'Взрыватель'}
-          defaultValue={value.fuseName}
-        />
-      </View>
-      <SelectDropdown
-        buttonStyle={styles.select}
-        data={trajectories.map(item => item.trajectory)}
-        onSelect={selectedItem => {
-          setValue('trajectory', selectedItem);
-        }}
-        defaultButtonText={'Траектория'}
-        defaultValue={value.trajectory}
-      />
-      <SelectDropdown
-        buttonStyle={styles.select}
-        data={charges.map(item => item.charge)}
-        onSelect={selectedItem => {
-          setValue('nameCharge', selectedItem);
-        }}
-        defaultButtonText={'Заряд'}
-        defaultValue={value.nameCharge}
-      />
+      <>
+        {Object.entries(selects).map(([key, item], index) => (
+          <View style={{width: index === 0 ? '100%' : '49%'}} key={key}>
+            <SelectDropdown
+              buttonStyle={styles.select}
+              data={item.data}
+              rowTextForSelection={item => item.text}
+              buttonTextAfterSelection={item => item.text}
+              onSelect={item => {
+                setValue(key, item.id);
+              }}
+              defaultButtonText={item.defaultButtonText}
+              defaultValueByIndex={value[key]}
+            />
+          </View>
+        ))}
+      </>
       {Object.entries(inputs).map(([key, item]) => (
         <Input
           key={key}
@@ -110,7 +113,7 @@ const styles = StyleSheet.create({
   },
   select: {
     backgroundColor: '#576644',
-    width: '49%',
+    width: '100%',
     height: 45,
     paddingLeft: 10,
     fontSize: 18,
