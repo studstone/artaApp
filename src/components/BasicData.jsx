@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingRight: 2,
     paddingLeft: 2,
-    marginTop: 12,
+    marginTop: 15,
     width: '49%',
     height: 45,
     borderColor: 'black',
@@ -117,6 +117,6 @@ const styles = StyleSheet.create({
     height: 45,
     paddingLeft: 10,
     fontSize: 18,
-    marginTop: 15,
+    marginTop: 7,
   },
 });
