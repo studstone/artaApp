@@ -21,6 +21,7 @@ import CoordinatsVariant from '../components/CoordinatsVariant';
 
 import shotingTables from '../DB/shotingTables';
 import Cancel from '../image/cancel.png';
+import FiringEquipment from '../components/FiringEquipment';
 
 const initBasicData = {
   fuseName: null,
@@ -122,49 +123,49 @@ const BatteryCommander = () => {
     [targetData],
   );
 
-  // React.useEffect(() => {
-  //   setIsLoading(true);
-  //   getData();
-  // }, []);
+  React.useEffect(() => {
+    setIsLoading(true);
+    getData();
+  }, []);
 
-  // React.useEffect(() => {
-  //   storeData();
-  // }, [basicData, OPData, FPData, targetData, targets, activeTarget]);
+  React.useEffect(() => {
+    storeData();
+  }, [basicData, OPData, FPData, targetData, targets, activeTarget]);
 
-  // const getData = async () => {
-  //   try {
-  //     const jsonValue = await AsyncStorage.getItem('data');
-  //     if (jsonValue !== null) {
-  //       const data = JSON.parse(jsonValue);
-  //       setBasicData(data.basicData);
-  //       setOPData(data.OPData);
-  //       setFPData(data.FPData);
-  //       setTargetData(data.targetData);
-  //       setTargets(data.targets);
-  //       setActiveTarget(data.activeTarget);
-  //     }
-  //     setIsLoading(false);
-  //   } catch (e) {
-  //     // error reading value
-  //   }
-  // };
+  const getData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('data');
+      if (jsonValue !== null) {
+        const data = JSON.parse(jsonValue);
+        setBasicData(data.basicData);
+        setOPData(data.OPData);
+        setFPData(data.FPData);
+        setTargetData(data.targetData);
+        setTargets(data.targets);
+        setActiveTarget(data.activeTarget);
+      }
+      setIsLoading(false);
+    } catch (e) {
+      // error reading value
+    }
+  };
 
-  // const storeData = async () => {
-  //   const obj = {
-  //     basicData,
-  //     OPData,
-  //     FPData,
-  //     targetData,
-  //     targets,
-  //     activeTarget,
-  //   };
-  //   try {
-  //     const jsonValue = JSON.stringify(obj);
-  //     await AsyncStorage.setItem('data', jsonValue);
-  //   } catch (e) {
-  //     // saving error
-  //   }
-  // };
+  const storeData = async () => {
+    const obj = {
+      basicData,
+      OPData,
+      FPData,
+      targetData,
+      targets,
+      activeTarget,
+    };
+    try {
+      const jsonValue = JSON.stringify(obj);
+      await AsyncStorage.setItem('data', jsonValue);
+    } catch (e) {
+      // saving error
+    }
+  };
 
   /** расчет х,у цели*/
   const coordinateTargetСalculation = React.useCallback(() => {
@@ -783,9 +784,9 @@ const BatteryCommander = () => {
       {!isLoading && (
         <ScrollView>
           <ModalBlock
-            // angle={angleСalculation()}
-            // rangeСalculation={rangeСalculation()}
-            // heightFP={heightFP}
+            angle={angleСalculation()}
+            rangeСalculation={rangeСalculation()}
+            heightFP={FPData.heightFP}
             trajectory={basicData.trajectory}
             nameChargePrimary={basicData.nameCharge}
           />
@@ -815,132 +816,24 @@ const BatteryCommander = () => {
               </Text>
             </TouchableOpacity>
             {/* Установки */}
-            <View style={styles.answerWrapper}>
-              <View
-                style={{
-                  width: '37%',
-                }}>
-                <Text
-                  style={{
-                    color: '#750000',
-                    fontSize: 18,
-                    marginBottom: 5,
-                  }}>
-                  {`Дт: ${rangeСalculation()}`}
-                </Text>
-                <Text
-                  style={{
-                    color: '#750000',
-                    fontSize: 18,
-                    marginBottom: 5,
-                  }}>
-                  {`δт: ${replaceAngle(angleFromMainStreamСalculation())}`}
-                </Text>
-                <Text
-                  style={{
-                    color: '#750000',
-                    fontSize: 18,
-                    marginBottom: 5,
-                  }}>
-                  {`ΔД: ${targetData.amendmentRange}`}
-                </Text>
-                <Text
-                  style={{
-                    color: '#750000',
-                    fontSize: 18,
-                    marginBottom: 5,
-                  }}>
-                  {`Δδ: ${replaceAngle(targetData.amendmentAngle)}`}
-                </Text>
-                <Text
-                  style={{
-                    color: '#750000',
-                    fontSize: 18,
-                  }}>
-                  {`Ди: ${calculatedRangeСalculation()}`}
-                </Text>
-              </View>
-              <View
-                style={{
-                  width: '30%',
-                }}>
-                <Text
-                  style={{
-                    color: '#750000',
-                    fontSize: 18,
-                    marginBottom: 5,
-                  }}>
-                  {`У.вз: ${choosingFuseInstallation()}`}
-                </Text>
-                <Text
-                  style={{
-                    color: '#750000',
-                    fontSize: 18,
-                    marginBottom: 5,
-                  }}>
-                  {`Пр: ${rangeFinalСalculation()}`}
-                </Text>
-                <Text
-                  style={{
-                    color: '#750000',
-                    fontSize: 18,
-                    marginBottom: 5,
-                  }}>
-                  {excessСalculation() === 'NaN'
-                    ? 'Ур: 30-00'
-                    : `Ур: ${replaceAngle(excessСalculation())}`}
-                </Text>
-                <Text
-                  style={{
-                    color: '#750000',
-                    fontSize: 18,
-                    marginBottom: 5,
-                  }}>
-                  {calculatedAngleFromMainStreamСalculation() === '0.00'
-                    ? 'δи: ОН'
-                    : `δи: ${replaceAngle(
-                        calculatedAngleFromMainStreamСalculation(),
-                      )}`}
-                </Text>
-              </View>
-              <View
-                style={{
-                  width: '33%',
-                }}>
-                <Text
-                  style={{
-                    color: '#750000',
-                    fontSize: 18,
-                    marginBottom: 5,
-                  }}>
-                  {jumpCalculation()}
-                </Text>
-                <Text
-                  style={{
-                    color: '#750000',
-                    fontSize: 18,
-                    marginBottom: 5,
-                  }}>
-                  {replaceAngle(fanCalculation())}
-                </Text>
-                <Text
-                  style={{
-                    color: '#750000',
-                    fontSize: 18,
-                    marginBottom: 5,
-                  }}>
-                  {intervalFanCalculation()}
-                </Text>
-                <Text
-                  style={{
-                    color: '#750000',
-                    fontSize: 18,
-                    marginBottom: 5,
-                  }}>
-                  {`Тпол: ${returnDataST().time}`}
-                </Text>
-              </View>
-            </View>
+            <FiringEquipment
+              rangeСalculation={rangeFinalСalculation}
+              replaceAngle={replaceAngle}
+              angleFromMainStreamСalculation={angleFromMainStreamСalculation}
+              amendmentRange={targetData.amendmentRange}
+              amendmentAngle={targetData.amendmentAngle}
+              calculatedRangeСalculation={calculatedRangeСalculation}
+              choosingFuseInstallation={choosingFuseInstallation}
+              rangeFinalСalculation={rangeFinalСalculation}
+              excessСalculation={excessСalculation}
+              calculatedAngleFromMainStreamСalculation={
+                calculatedAngleFromMainStreamСalculation
+              }
+              jumpCalculation={jumpCalculation}
+              fanCalculation={fanCalculation}
+              intervalFanCalculation={intervalFanCalculation}
+              time={returnDataST().time}
+            />
             {/* Данные для расчета корректур */}
             <Text
               style={{
