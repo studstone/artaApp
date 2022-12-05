@@ -80,7 +80,7 @@ const BatteryCommander = () => {
   const [west, setWest] = React.useState('');
 
   const [isVisible, setIsVisible] = React.useState(true);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const changeBasicData = React.useCallback(
     (key, value) => {
@@ -122,49 +122,49 @@ const BatteryCommander = () => {
     [targetData],
   );
 
-  React.useEffect(() => {
-    setIsLoading(true);
-    getData();
-  }, []);
+  // React.useEffect(() => {
+  //   setIsLoading(true);
+  //   getData();
+  // }, []);
 
-  React.useEffect(() => {
-    storeData();
-  }, [basicData, OPData, FPData, targetData, targets, activeTarget]);
+  // React.useEffect(() => {
+  //   storeData();
+  // }, [basicData, OPData, FPData, targetData, targets, activeTarget]);
 
-  const getData = async () => {
-    try {
-      const jsonValue = await AsyncStorage.getItem('data');
-      if (jsonValue !== null) {
-        const data = JSON.parse(jsonValue);
-        setBasicData(data.basicData);
-        setOPData(data.OPData);
-        setFPData(data.FPData);
-        setTargetData(data.targetData);
-        setTargets(data.targets);
-        setActiveTarget(data.activeTarget);
-      }
-      setIsLoading(false);
-    } catch (e) {
-      // error reading value
-    }
-  };
+  // const getData = async () => {
+  //   try {
+  //     const jsonValue = await AsyncStorage.getItem('data');
+  //     if (jsonValue !== null) {
+  //       const data = JSON.parse(jsonValue);
+  //       setBasicData(data.basicData);
+  //       setOPData(data.OPData);
+  //       setFPData(data.FPData);
+  //       setTargetData(data.targetData);
+  //       setTargets(data.targets);
+  //       setActiveTarget(data.activeTarget);
+  //     }
+  //     setIsLoading(false);
+  //   } catch (e) {
+  //     // error reading value
+  //   }
+  // };
 
-  const storeData = async () => {
-    const obj = {
-      basicData,
-      OPData,
-      FPData,
-      targetData,
-      targets,
-      activeTarget,
-    };
-    try {
-      const jsonValue = JSON.stringify(obj);
-      await AsyncStorage.setItem('data', jsonValue);
-    } catch (e) {
-      // saving error
-    }
-  };
+  // const storeData = async () => {
+  //   const obj = {
+  //     basicData,
+  //     OPData,
+  //     FPData,
+  //     targetData,
+  //     targets,
+  //     activeTarget,
+  //   };
+  //   try {
+  //     const jsonValue = JSON.stringify(obj);
+  //     await AsyncStorage.setItem('data', jsonValue);
+  //   } catch (e) {
+  //     // saving error
+  //   }
+  // };
 
   /** расчет х,у цели*/
   const coordinateTargetСalculation = React.useCallback(() => {
@@ -350,13 +350,15 @@ const BatteryCommander = () => {
       const topographicRange = rangeСalculation();
       let height = 0;
 
-      if (isVisible) {
-        height = heightTarget;
+      if (targetData.coordinateVariant) {
+        height = targetData.heightTarget;
       } else {
-        height = +heightOP + (rangeTarget * verticalAngleTarget) / 955;
+        height =
+          +OPData.heightOP +
+          (targetData.rangeTarget * targetData.verticalAngleTarget) / 955;
       }
       const excess = (
-        ((height - heightFP) / (0.001 * topographicRange)) * 0.01 +
+        ((height - FPData.heightFP) / (0.001 * topographicRange)) * 0.01 +
         30
       ).toFixed(2);
 
@@ -368,31 +370,25 @@ const BatteryCommander = () => {
   };
   /*расчет дир.угл б-ц*/
   const angleСalculation = () => {
-    const coordinateX = +coordinateOPX;
-    const coordinateY = +coordinateOPY;
-    const angleT = +angleTarget;
-
     let directionalAngle = 0;
     let angle = 0;
 
-    if (isVisible) {
+    if (targetData.coordinateVariant) {
       directionalAngle =
         (Math.atan2(
-          coordinateTargetY - coordinateFPY,
-          coordinateTargetX - coordinateFPX,
+          targetData.coordinateTargetY - FPData.coordinateFPY,
+          targetData.coordinateTargetX - FPData.coordinateFPX,
         ) *
           180) /
         Math.PI /
         6;
     } else {
-      const targetX = Math.round(
-        coordinateX + rangeTarget * Math.cos(angleT * 6 * (Math.PI / 180)),
-      );
-      const targetY = Math.round(
-        coordinateY + rangeTarget * Math.sin(angleT * 6 * (Math.PI / 180)),
-      );
       directionalAngle =
-        (Math.atan2(targetY - coordinateFPY, targetX - coordinateFPX) * 180) /
+        (Math.atan2(
+          coordinateTargetСalculation().targetY - FPData.coordinateFPY,
+          coordinateTargetСalculation().targetX - FPData.coordinateFPX,
+        ) *
+          180) /
         Math.PI /
         6;
     }
@@ -409,9 +405,9 @@ const BatteryCommander = () => {
     let directionAlngle = 0;
 
     if (angleСalculation() >= 52.5 && angleСalculation() <= 60) {
-      directionAlngle = angleСalculation() - mainStream - 60;
+      directionAlngle = angleСalculation() - basicData.mainStream - 60;
     } else {
-      directionAlngle = angleСalculation() - mainStream;
+      directionAlngle = angleСalculation() - basicData.mainStream;
     }
 
     if (directionAlngle < -15) {
@@ -422,7 +418,8 @@ const BatteryCommander = () => {
   };
   /*расчет исчисленного доворота*/
   const calculatedAngleFromMainStreamСalculation = () => {
-    const calculatedAngle = +angleFromMainStreamСalculation() + +amendmentAngle;
+    const calculatedAngle =
+      +angleFromMainStreamСalculation() + +targetData.amendmentAngle;
 
     return calculatedAngle.toFixed(2);
   };
@@ -440,16 +437,18 @@ const BatteryCommander = () => {
   const fanCalculation = () => {
     let fan = 0;
 
-    if (frontTarget - frontFP !== 0) {
+    if (targetData.frontTarget - basicData.frontFP !== 0) {
       fan = (
-        ((frontTarget - frontFP) / 4 / (0.001 * calculatedRangeСalculation())) *
+        ((targetData.frontTarget - basicData.frontFP) /
+          4 /
+          (0.001 * calculatedRangeСalculation())) *
         0.01
       ).toFixed(2);
     } else {
       return 'Iв ';
     }
 
-    if (frontTarget === '' || frontFP === '') {
+    if (targetData.frontTarget === '' || basicData.frontFP === '') {
       return 'Iв ';
     } else if (fan < 0) {
       return `Iв соед в ${fan * -1}`;
@@ -464,17 +463,19 @@ const BatteryCommander = () => {
     const dXtis = returnDataST().dXtis;
     let jump = 0;
 
-    if (depthTarget === '') {
+    if (targetData.depthTarget === '') {
       jump = 0;
     } else {
-      jump = Math.round(depthTarget / 3 / dXtis);
+      jump = Math.round(targetData.depthTarget / 3 / dXtis);
     }
 
     return `Ск: ${jump}`;
   };
   /*расчет интервала веера на орудие*/
   const intervalFanCalculation = () => {
-    const intervalFan = Math.round((frontTarget - frontFP) / 4);
+    const intervalFan = Math.round(
+      (targetData.frontTarget - basicData.frontFP) / 4,
+    );
 
     if (intervalFan < 0) {
       return `Iв.ор 0`;
@@ -482,19 +483,19 @@ const BatteryCommander = () => {
       return `Iв.ор ${intervalFan}`;
     }
   };
-  /*расчет дфльности командира*/
+  /*расчет дальности командира*/
   const rangeCommanderCalculation = () => {
     let topographicRange = 0;
 
-    if (isVisible) {
+    if (targetData.coordinateVariant) {
       topographicRange = Math.round(
         Math.sqrt(
-          Math.pow(coordinateTargetX - coordinateOPX, 2) +
-            Math.pow(coordinateTargetY - coordinateOPY, 2),
+          Math.pow(targetData.coordinateTargetX - OPData.coordinateOPX, 2) +
+            Math.pow(targetData.coordinateTargetY - OPData.coordinateOPY, 2),
         ),
       );
     } else {
-      topographicRange = rangeTarget;
+      topographicRange = targetData.rangeTarget;
     }
 
     return topographicRange;
@@ -504,17 +505,17 @@ const BatteryCommander = () => {
     let directionalAngle = 0;
     let angle = 0;
 
-    if (isVisible) {
+    if (targetData.coordinateVariant) {
       directionalAngle =
         (Math.atan2(
-          coordinateTargetY - coordinateOPY,
-          coordinateTargetX - coordinateOPX,
+          targetData.coordinateTargetY - OPData.coordinateOPY,
+          targetData.coordinateTargetX - OPData.coordinateOPX,
         ) *
           180) /
         Math.PI /
         6;
     } else {
-      directionalAngle = +angleTarget;
+      directionalAngle = +targetData.angleTarget;
     }
 
     if (directionalAngle < 0) {
@@ -605,8 +606,8 @@ const BatteryCommander = () => {
     let proofreadingInAim = 0;
     let proofreadingInAngle = 0;
 
-    const coordinateX = +coordinateOPX;
-    const coordinateY = +coordinateOPY;
+    const coordinateX = +OPData.coordinateOPX;
+    const coordinateY = +OPData.coordinateOPY;
     const angle = +angleBurst;
 
     const burstX = Math.round(
@@ -618,13 +619,17 @@ const BatteryCommander = () => {
 
     const topographicRangeBurst = Math.round(
       Math.sqrt(
-        Math.pow(burstX - coordinateFPX, 2) +
-          Math.pow(burstY - coordinateFPY, 2),
+        Math.pow(burstX - FPData.coordinateFPX, 2) +
+          Math.pow(burstY - FPData.coordinateFPY, 2),
       ),
     );
 
     const directionalAngle =
-      (Math.atan2(burstY - coordinateFPY, burstX - coordinateFPX) * 180) /
+      (Math.atan2(
+        burstY - FPData.coordinateFPY,
+        burstX - FPData.coordinateFPX,
+      ) *
+        180) /
       Math.PI /
       6;
 
@@ -638,9 +643,9 @@ const BatteryCommander = () => {
     }
 
     if (angleFPInBurst >= 52.5 && angleFPInBurst <= 60) {
-      directionAlngle = angleFPInBurst - mainStream - 60;
+      directionAlngle = angleFPInBurst - basicData.mainStream - 60;
     } else {
-      directionAlngle = angleFPInBurst - mainStream;
+      directionAlngle = angleFPInBurst - basicData.mainStream;
     }
 
     if (rangeBurst === '' || angleBurst === '') {
@@ -671,19 +676,21 @@ const BatteryCommander = () => {
     let proofreadingInAngle = 0;
     let targetX = 0;
     let targetY = 0;
-    const coordinateX = +coordinateOPX;
-    const coordinateY = +coordinateOPY;
-    const angle = +angleTarget;
+    const coordinateX = +OPData.coordinateOPX;
+    const coordinateY = +OPData.coordinateOPY;
+    const angle = +targetData.angleTarget;
 
-    if (isVisible) {
-      targetX = +coordinateTargetX;
-      targetY = +coordinateTargetY;
+    if (targetData.coordinateVariant) {
+      targetX = +targetData.coordinateTargetX;
+      targetY = +targetData.coordinateTargetY;
     } else {
       targetX = Math.round(
-        coordinateX + rangeTarget * Math.cos(angle * 6 * (Math.PI / 180)),
+        coordinateX +
+          targetData.rangeTarget * Math.cos(angle * 6 * (Math.PI / 180)),
       );
       targetY = Math.round(
-        coordinateY + rangeTarget * Math.sin(angle * 6 * (Math.PI / 180)),
+        coordinateY +
+          targetData.rangeTarget * Math.sin(angle * 6 * (Math.PI / 180)),
       );
     }
 
@@ -692,13 +699,17 @@ const BatteryCommander = () => {
 
     const topographicRangeBurst = Math.round(
       Math.sqrt(
-        Math.pow(burstX - coordinateFPX, 2) +
-          Math.pow(burstY - coordinateFPY, 2),
+        Math.pow(burstX - FPData.coordinateFPX, 2) +
+          Math.pow(burstY - FPData.coordinateFPY, 2),
       ),
     );
 
     const directionalAngle =
-      (Math.atan2(burstY - coordinateFPY, burstX - coordinateFPX) * 180) /
+      (Math.atan2(
+        burstY - FPData.coordinateFPY,
+        burstX - FPData.coordinateFPX,
+      ) *
+        180) /
       Math.PI /
       6;
 
@@ -712,16 +723,16 @@ const BatteryCommander = () => {
     }
 
     if (angleFPInBurst >= 52.5 && angleFPInBurst <= 60) {
-      directionAlngle = angleFPInBurst - mainStream - 60;
+      directionAlngle = angleFPInBurst - basicData.mainStream - 60;
     } else {
-      directionAlngle = angleFPInBurst - mainStream;
+      directionAlngle = angleFPInBurst - basicData.mainStream;
     }
 
     if (rangeСalculation() === 0 || returnDataST().dXtis === 0) {
       proofreadingInAngle = 0;
       proofreadingInAim = 0;
     } else {
-      if (trajectory.toLocaleLowerCase() === 'н') {
+      if (basicData.trajectory === 0) {
         proofreadingInAim = Math.round(
           (rangeСalculation() - topographicRangeBurst) / returnDataST().dXtis,
         );
@@ -815,9 +826,9 @@ const BatteryCommander = () => {
                     fontSize: 18,
                     marginBottom: 5,
                   }}>
-                  {`Дт: `}
+                  {`Дт: ${rangeСalculation()}`}
                 </Text>
-                {/* <Text
+                <Text
                   style={{
                     color: '#750000',
                     fontSize: 18,
@@ -831,7 +842,7 @@ const BatteryCommander = () => {
                     fontSize: 18,
                     marginBottom: 5,
                   }}>
-                  {`ΔД: ${amendmentRange}`}
+                  {`ΔД: ${targetData.amendmentRange}`}
                 </Text>
                 <Text
                   style={{
@@ -839,7 +850,7 @@ const BatteryCommander = () => {
                     fontSize: 18,
                     marginBottom: 5,
                   }}>
-                  {`Δδ: ${replaceAngle(amendmentAngle)}`}
+                  {`Δδ: ${replaceAngle(targetData.amendmentAngle)}`}
                 </Text>
                 <Text
                   style={{
@@ -847,9 +858,9 @@ const BatteryCommander = () => {
                     fontSize: 18,
                   }}>
                   {`Ди: ${calculatedRangeСalculation()}`}
-                </Text> */}
+                </Text>
               </View>
-              {/* <View
+              <View
                 style={{
                   width: '30%',
                 }}>
@@ -891,8 +902,8 @@ const BatteryCommander = () => {
                         calculatedAngleFromMainStreamСalculation(),
                       )}`}
                 </Text>
-              </View> */}
-              {/* <View
+              </View>
+              <View
                 style={{
                   width: '33%',
                 }}>
@@ -928,10 +939,10 @@ const BatteryCommander = () => {
                   }}>
                   {`Тпол: ${returnDataST().time}`}
                 </Text>
-              </View> */}
+              </View>
             </View>
             {/* Данные для расчета корректур */}
-            {/* <Text
+            <Text
               style={{
                 textAlign: 'center',
                 fontSize: 30,
@@ -939,8 +950,8 @@ const BatteryCommander = () => {
                 marginBottom: 15,
               }}>
               Данные для расчета корректур
-            </Text> */}
-            {/* <View
+            </Text>
+            <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -1041,9 +1052,9 @@ const BatteryCommander = () => {
                 }}>
                 {`2Вд: ΔП=${vdInAim(2)}`}
               </Text>
-            </View> */}
+            </View>
             {/* Рассчет коррекур */}
-            {/* <Text
+            <Text
               style={{
                 textAlign: 'center',
                 fontSize: 30,
@@ -1051,8 +1062,8 @@ const BatteryCommander = () => {
                 marginBottom: 15,
               }}>
               Расчет корректур (Др,&nbsp; УГр)
-            </Text> */}
-            {/* <View style={styles.wrapper}>
+            </Text>
+            <View style={styles.wrapper}>
               <View style={styles.inputWrapper}>
                 <>{rangeBurst && <Text style={styles.label}>Др:</Text>}</>
                 <TextInput
@@ -1095,8 +1106,8 @@ const BatteryCommander = () => {
                   )}
                 </>
               </View>
-            </View> */}
-            {/* <View style={styles.answerWrapper}>
+            </View>
+            <View style={styles.answerWrapper}>
               <Text
                 style={{
                   color: '#750000',
@@ -1115,9 +1126,9 @@ const BatteryCommander = () => {
                   proofreadingCalculationFirst().proofreadingInAngle,
                 )}`}
               </Text>
-            </View> */}
+            </View>
             {/* Рассчет коррекур */}
-            {/* <Text
+            <Text
               style={{
                 textAlign: 'center',
                 fontSize: 30,
@@ -1126,8 +1137,8 @@ const BatteryCommander = () => {
                 marginTop: 20,
               }}>
               Расчет корректур (ПКСС)
-            </Text> */}
-            {/* <View style={styles.wrapper}>
+            </Text>
+            <View style={styles.wrapper}>
               <View style={styles.inputWrapper}>
                 <>{north && <Text style={styles.label}>С:</Text>}</>
                 <TextInput
@@ -1212,8 +1223,8 @@ const BatteryCommander = () => {
                   )}
                 </>
               </View>
-            </View> */}
-            {/* <View style={styles.answerWrapper}>
+            </View>
+            <View style={styles.answerWrapper}>
               <Text
                 style={{
                   color: '#750000',
@@ -1232,7 +1243,7 @@ const BatteryCommander = () => {
                   proofreadingCalculationSecond().proofreadingInAngle,
                 )}`}
               </Text>
-            </View> */}
+            </View>
           </View>
         </ScrollView>
       )}
