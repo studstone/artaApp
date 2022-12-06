@@ -18,10 +18,11 @@ import FirePosition from '../components/FirePosition';
 import DescriptionTarget from '../components/DescriptionTarget';
 import TargetsList from '../components/TargetsList';
 import CoordinatsVariant from '../components/CoordinatsVariant';
+import FiringEquipment from '../components/FiringEquipment';
+import PolarDeviationsBurst from '../components/PolarDeviationsBurst';
+import CardinalPointsBurst from '../components/CardinalPointsBurst';
 
 import shotingTables from '../DB/shotingTables';
-import Cancel from '../image/cancel.png';
-import FiringEquipment from '../components/FiringEquipment';
 
 const initBasicData = {
   fuseName: null,
@@ -59,6 +60,15 @@ const initTargetData = {
   amendmentAngle: '',
 };
 
+const initBurstData = {
+  rangeBurst: '',
+  angleBurst: '',
+  north: '',
+  south: '',
+  east: '',
+  west: '',
+};
+
 const BatteryCommander = () => {
   const [basicData, setBasicData] = React.useState({...initBasicData});
   const [OPData, setOPData] = React.useState({...initOPData});
@@ -69,19 +79,9 @@ const BatteryCommander = () => {
 
   const [targetData, setTargetData] = React.useState({...initTargetData});
 
-  const [rangeBurst, setRangeBurst] = React.useState('');
-  const [angleBurst, setAngleBurst] = React.useState('');
+  const [burstData, setBurstData] = React.useState({...initBurstData});
 
-  const [burstX, setBurstX] = React.useState('');
-  const [burstY, setBurstY] = React.useState('');
-
-  const [north, setNorth] = React.useState('');
-  const [south, setSouth] = React.useState('');
-  const [east, setEast] = React.useState('');
-  const [west, setWest] = React.useState('');
-
-  const [isVisible, setIsVisible] = React.useState(true);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const changeBasicData = React.useCallback(
     (key, value) => {
@@ -123,6 +123,15 @@ const BatteryCommander = () => {
     [targetData],
   );
 
+  const changeBurstData = React.useCallback(
+    (key, value) => {
+      setBurstData(prev => ({
+        ...prev,
+        [key]: value,
+      }));
+    },
+    [burstData],
+  );
   React.useEffect(() => {
     setIsLoading(true);
     getData();
@@ -130,7 +139,7 @@ const BatteryCommander = () => {
 
   React.useEffect(() => {
     storeData();
-  }, [basicData, OPData, FPData, targetData, targets, activeTarget]);
+  }, [basicData, OPData, FPData, targetData, targets, activeTarget, burstData]);
 
   const getData = async () => {
     try {
@@ -143,6 +152,7 @@ const BatteryCommander = () => {
         setTargetData(data.targetData);
         setTargets(data.targets);
         setActiveTarget(data.activeTarget);
+        setBurstData(data.burstData);
       }
       setIsLoading(false);
     } catch (e) {
@@ -158,6 +168,7 @@ const BatteryCommander = () => {
       targetData,
       targets,
       activeTarget,
+      burstData,
     };
     try {
       const jsonValue = JSON.stringify(obj);
@@ -609,13 +620,15 @@ const BatteryCommander = () => {
 
     const coordinateX = +OPData.coordinateOPX;
     const coordinateY = +OPData.coordinateOPY;
-    const angle = +angleBurst;
+    const angle = +burstData.angleBurst;
 
     const burstX = Math.round(
-      coordinateX + rangeBurst * Math.cos(angle * 6 * (Math.PI / 180)),
+      coordinateX +
+        burstData.rangeBurst * Math.cos(angle * 6 * (Math.PI / 180)),
     );
     const burstY = Math.round(
-      coordinateY + rangeBurst * Math.sin(angle * 6 * (Math.PI / 180)),
+      coordinateY +
+        burstData.rangeBurst * Math.sin(angle * 6 * (Math.PI / 180)),
     );
 
     const topographicRangeBurst = Math.round(
@@ -649,11 +662,11 @@ const BatteryCommander = () => {
       directionAlngle = angleFPInBurst - basicData.mainStream;
     }
 
-    if (rangeBurst === '' || angleBurst === '') {
+    if (burstData.rangeBurst === '' || burstData.angleBurst === '') {
       proofreadingInAngle = 0;
       proofreadingInAim = 0;
     } else {
-      if (trajectory.toLocaleLowerCase() === 'н') {
+      if (basicData.trajectory === 0) {
         proofreadingInAim = Math.round(
           (rangeСalculation() - topographicRangeBurst) / returnDataST().dXtis,
         );
@@ -695,8 +708,8 @@ const BatteryCommander = () => {
       );
     }
 
-    const burstX = +targetX + +north - +south;
-    const burstY = +targetY + +east - +west;
+    const burstX = +targetX + +burstData.north - +burstData.south;
+    const burstY = +targetY + +burstData.east - +burstData.west;
 
     const topographicRangeBurst = Math.round(
       Math.sqrt(
@@ -947,196 +960,27 @@ const BatteryCommander = () => {
               </Text>
             </View>
             {/* Рассчет коррекур */}
-            <Text
-              style={{
-                textAlign: 'center',
-                fontSize: 30,
-                color: '#000a96',
-                marginBottom: 15,
-              }}>
-              Расчет корректур (Др,&nbsp; УГр)
-            </Text>
-            <View style={styles.wrapper}>
-              <View style={styles.inputWrapper}>
-                <>{rangeBurst && <Text style={styles.label}>Др:</Text>}</>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  onChangeText={setRangeBurst}
-                  value={rangeBurst}
-                  placeholder="Дальн. разрыва"
-                  placeholderTextColor={'black'}
-                  maxLength={5}
-                />
-                <>
-                  {rangeBurst && (
-                    <View style={styles.button}>
-                      <TouchableOpacity onPress={() => setRangeBurst('')}>
-                        <Image style={styles.image} source={Cancel} />
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </>
-              </View>
-              <View style={styles.inputWrapper}>
-                <>{angleBurst && <Text style={styles.label}>УГр:</Text>}</>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numbers-and-punctuation"
-                  onChangeText={setAngleBurst}
-                  value={angleBurst}
-                  placeholder="Угол разрыва"
-                  placeholderTextColor={'black'}
-                  maxLength={5}
-                />
-                <>
-                  {angleBurst && (
-                    <View style={styles.button}>
-                      <TouchableOpacity onPress={() => setAngleBurst('')}>
-                        <Image style={styles.image} source={Cancel} />
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </>
-              </View>
-            </View>
-            <View style={styles.answerWrapper}>
-              <Text
-                style={{
-                  color: '#750000',
-                  fontSize: 42,
-                  width: '50%',
-                }}>
-                {`ΔПр: ${proofreadingCalculationFirst().proofreadingInAim}`}
-              </Text>
-              <Text
-                style={{
-                  color: '#750000',
-                  fontSize: 42,
-                  width: '50%',
-                }}>
-                {`Δδ: ${replaceAngle(
-                  proofreadingCalculationFirst().proofreadingInAngle,
-                )}`}
-              </Text>
-            </View>
+            <PolarDeviationsBurst
+              value={burstData}
+              setValue={changeBurstData}
+              proofreadingInAim={
+                proofreadingCalculationFirst().proofreadingInAim
+              }
+              proofreadingInAngle={replaceAngle(
+                proofreadingCalculationFirst().proofreadingInAngle,
+              )}
+            />
             {/* Рассчет коррекур */}
-            <Text
-              style={{
-                textAlign: 'center',
-                fontSize: 30,
-                color: '#000a96',
-                marginBottom: 15,
-                marginTop: 20,
-              }}>
-              Расчет корректур (ПКСС)
-            </Text>
-            <View style={styles.wrapper}>
-              <View style={styles.inputWrapper}>
-                <>{north && <Text style={styles.label}>С:</Text>}</>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  onChangeText={setNorth}
-                  value={north}
-                  placeholder="Север"
-                  placeholderTextColor={'black'}
-                  maxLength={4}
-                />
-                <>
-                  {north && (
-                    <View style={styles.button}>
-                      <TouchableOpacity onPress={() => setNorth('')}>
-                        <Image style={styles.image} source={Cancel} />
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </>
-              </View>
-              <View style={styles.inputWrapper}>
-                <>{south && <Text style={styles.label}>Ю:</Text>}</>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  onChangeText={setSouth}
-                  value={south}
-                  placeholder="ЮГ"
-                  placeholderTextColor={'black'}
-                  maxLength={4}
-                />
-                <>
-                  {south && (
-                    <View style={styles.button}>
-                      <TouchableOpacity onPress={() => setSouth('')}>
-                        <Image style={styles.image} source={Cancel} />
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </>
-              </View>
-              <View style={styles.inputWrapper}>
-                <>{west && <Text style={styles.label}>З:</Text>}</>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  onChangeText={setWest}
-                  value={west}
-                  placeholder="Запад"
-                  placeholderTextColor={'black'}
-                  maxLength={4}
-                />
-                <>
-                  {west && (
-                    <View style={styles.button}>
-                      <TouchableOpacity onPress={() => setWest('')}>
-                        <Image style={styles.image} source={Cancel} />
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </>
-              </View>
-              <View style={styles.inputWrapper}>
-                <>{east && <Text style={styles.label}>В:</Text>}</>
-                <TextInput
-                  style={styles.input}
-                  keyboardType="numeric"
-                  onChangeText={setEast}
-                  value={east}
-                  placeholder="Восток"
-                  placeholderTextColor={'black'}
-                  maxLength={4}
-                />
-                <>
-                  {east && (
-                    <View style={styles.button}>
-                      <TouchableOpacity onPress={() => setEast('')}>
-                        <Image style={styles.image} source={Cancel} />
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </>
-              </View>
-            </View>
-            <View style={styles.answerWrapper}>
-              <Text
-                style={{
-                  color: '#750000',
-                  fontSize: 42,
-                  width: '50%',
-                }}>
-                {`ΔП: ${proofreadingCalculationSecond().proofreadingInAim}`}
-              </Text>
-              <Text
-                style={{
-                  color: '#750000',
-                  fontSize: 42,
-                  width: '50%',
-                }}>
-                {`Δδ: ${replaceAngle(
-                  proofreadingCalculationSecond().proofreadingInAngle,
-                )}`}
-              </Text>
-            </View>
+            <CardinalPointsBurst
+              value={burstData}
+              setValue={changeBurstData}
+              proofreadingInAim={
+                proofreadingCalculationSecond().proofreadingInAim
+              }
+              proofreadingInAngle={replaceAngle(
+                proofreadingCalculationSecond().proofreadingInAngle,
+              )}
+            />
           </View>
         </ScrollView>
       )}
