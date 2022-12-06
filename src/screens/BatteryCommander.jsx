@@ -78,7 +78,7 @@ const BatteryCommander = () => {
   const [activeTarget, setActiveTarget] = React.useState(null);
 
   const [targetData, setTargetData] = React.useState({...initTargetData});
-
+  console.log(targetData);
   const [burstData, setBurstData] = React.useState({...initBurstData});
 
   const [isLoading, setIsLoading] = React.useState(true);
@@ -132,6 +132,7 @@ const BatteryCommander = () => {
     },
     [burstData],
   );
+
   React.useEffect(() => {
     setIsLoading(true);
     getData();
@@ -800,8 +801,8 @@ const BatteryCommander = () => {
             angle={angleСalculation()}
             rangeСalculation={rangeСalculation()}
             heightFP={FPData.heightFP}
-            trajectory={basicData.trajectory}
-            nameChargePrimary={basicData.nameCharge}
+            basicData={basicData}
+            changeTargetData={changeTargetData}
           />
           <View>
             {/* Вхoдные данные */}

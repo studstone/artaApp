@@ -1,113 +1,108 @@
 import React from 'react';
 import {
-  Alert,
   Modal,
   StyleSheet,
   Text,
   Pressable,
   View,
-  TextInput,
-  TouchableOpacity,
-  Image,
   ScrollView,
 } from 'react-native';
+
 import shotingTables from '../DB/shotingTables';
+
 import {
   temperatureCharge,
   componentsWind,
   windSpeedObj,
   verticalTemperatureObj,
 } from '../DB/WeatherTables';
-import Cancel from '../image/cancel.png';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MeteoData from './MeteoData';
+
+const initMeteoData = {
+  pressure: '',
+  airTemperature: '',
+  directorateAngleWind: '',
+  windSpeed: '',
+  deviationInitialSpeed: '',
+  chargeTemperature: '',
+  heightWeatherPost: '',
+};
 
 const ModalBlock = ({
   angle,
   heightFP,
   rangeСalculation,
-  trajectory,
-  nameChargePrimary,
+  basicData,
+  changeTargetData,
 }) => {
   const [modalVisible, setModalVisible] = React.useState(false);
-  const [pressure, setPressure] = React.useState('');
-  const [airTemperature, setAirTemperature] = React.useState('');
-  const [directorateAngleWind, setDirectorateAngleWind] = React.useState('');
-  const [windSpeed, setWindSpeed] = React.useState('');
-  const [deviationInitialSpeed, setDeviationInitialSpeed] = React.useState('');
-  const [chargeTemperature, setСhargeTemperature] = React.useState('');
-  const [heightWeatherPost, setHeightWeatherPost] = React.useState('');
+
+  const [meteoData, setMeteoData] = React.useState({...initMeteoData});
+
   const angleTarget = Math.round(angle);
-  const nameCharge = nameChargePrimary;
+
+  const changeMeteoData = React.useCallback(
+    (key, value) => {
+      setMeteoData(prev => ({
+        ...prev,
+        [key]: value,
+      }));
+    },
+    [meteoData],
+  );
 
   React.useEffect(() => {
-    getMyStringValue('pressure', setPressure);
-    getMyStringValue('airTemperature', setAirTemperature);
-    getMyStringValue('directorateAngleWind', setDirectorateAngleWind);
-    getMyStringValue('windSpeed', setWindSpeed);
-    getMyStringValue('deviationInitialSpeed', setDeviationInitialSpeed);
-    getMyStringValue('chargeTemperature', setСhargeTemperature);
-    getMyStringValue('heightWeatherPost', setHeightWeatherPost);
+    getData();
   }, []);
-  React.useEffect(() => {
-    storeData('pressure', pressure);
-    storeData('airTemperature', airTemperature);
-    storeData('directorateAngleWind', directorateAngleWind);
-    storeData('windSpeed', windSpeed);
-    storeData('deviationInitialSpeed', deviationInitialSpeed);
-    storeData('chargeTemperature', chargeTemperature);
-    storeData('heightWeatherPost', heightWeatherPost);
-  }, [
-    pressure,
-    airTemperature,
-    directorateAngleWind,
-    windSpeed,
-    deviationInitialSpeed,
-    chargeTemperature,
-    heightWeatherPost,
-  ]);
 
-  const storeData = async (key, value) => {
+  React.useEffect(() => {
+    storeData();
+  }, [meteoData]);
+
+  const getData = async () => {
     try {
-      await AsyncStorage.setItem(`${key}`, value);
+      const jsonValue = await AsyncStorage.getItem('meteo');
+      if (jsonValue !== null) {
+        const data = JSON.parse(jsonValue);
+        setMeteoData(data);
+      }
     } catch (e) {
-      console.log(e);
+      // error reading value
     }
   };
 
-  const getMyStringValue = async (key, satState) => {
+  const storeData = async () => {
     try {
-      const dataLocal = await AsyncStorage.getItem(`${key}`);
-
-      if (dataLocal !== null) {
-        satState(dataLocal);
-      }
+      const jsonValue = JSON.stringify(meteoData);
+      await AsyncStorage.setItem('meteo', jsonValue);
     } catch (e) {
-      console.log(e);
+      // saving error
     }
   };
 
   const deviationInitialSpeedChargeCalculation = () => {
     try {
-      let nameCharge = nameChargePrimary;
+      let nameCharge = basicData.nameCharge;
 
-      if (nameCharge === '1') {
-        nameCharge = 'у';
-      } else if (nameCharge === '3') {
-        nameCharge = '2';
+      if (nameCharge === 2) {
+        nameCharge = 1;
+      } else if (nameCharge === 4) {
+        nameCharge = 3;
       }
 
       const supportTemperature = temperatureCharge
-        .filter(el => el.name === nameCharge.toLocaleLowerCase())
-        .find(el => el.temperature >= +chargeTemperature).temperature;
+        .filter(el => el.name === nameCharge)
+        .find(el => el.temperature >= +meteoData.chargeTemperature).temperature;
       const supportdV0 = temperatureCharge
-        .filter(el => el.name === nameCharge.toLocaleLowerCase())
-        .find(el => el.temperature >= +chargeTemperature).dV0;
+        .filter(el => el.name === nameCharge)
+        .find(el => el.temperature >= +meteoData.chargeTemperature).dV0;
       const step = temperatureCharge
-        .filter(el => el.name === nameCharge.toLocaleLowerCase())
-        .find(el => el.temperature >= +chargeTemperature).step;
+        .filter(el => el.name === nameCharge)
+        .find(el => el.temperature >= +meteoData.chargeTemperature).step;
       const dVoCharge =
-        (+chargeTemperature - supportTemperature) * step + supportdV0;
+        (+meteoData.chargeTemperature - supportTemperature) * step + supportdV0;
 
       return dVoCharge;
     } catch (error) {
@@ -119,14 +114,15 @@ const ModalBlock = ({
   /** рассчитываем dV0 суммарное */
   const totalDeviationInitialSpeedCalculation = () => {
     const totalDeviationInitialSpeed =
-      +deviationInitialSpeed + deviationInitialSpeedChargeCalculation();
+      +meteoData.deviationInitialSpeed +
+      deviationInitialSpeedChargeCalculation();
 
     return totalDeviationInitialSpeed;
   };
   /**рассчитываем dH */
   const deviationGroundPressureCalculation = () => {
     const deviationGroundPressure =
-      750 - +pressure + (heightWeatherPost - heightFP) / 10;
+      750 - +meteoData.pressure + (meteoData.heightWeatherPost - heightFP) / 10;
     return deviationGroundPressure;
   };
   /**рассчитываю опорную дальность */
@@ -134,15 +130,17 @@ const ModalBlock = ({
     try {
       let supportingRange = 0;
 
-      if (trajectory.toLocaleLowerCase() === 'н') {
+      if (basicData.trajectory === 0) {
         supportingRange = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.fuse === basicData.fuseName)
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= rangeСalculation).range;
       } else {
         supportingRange = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.fuse === basicData.fuseName)
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= rangeСalculation).range;
       }
       return supportingRange;
@@ -157,15 +155,15 @@ const ModalBlock = ({
     try {
       let highEntranceInBulletin = 0;
 
-      if (trajectory.toLocaleLowerCase() === 'н') {
+      if (basicData.basicData.trajectory === 0) {
         highEntranceInBulletin = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= rangeСalculation).Yb;
       } else {
         highEntranceInBulletin = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= rangeСalculation).Yb;
       }
 
@@ -225,7 +223,9 @@ const ModalBlock = ({
   const returnDeviationAirTemperature = () => {
     try {
       const deviationAirTemperature =
-        verticalTemperatureObj[airTemperature][returnHighEntranceInBulletin()];
+        verticalTemperatureObj[meteoData.airTemperature][
+          returnHighEntranceInBulletin()
+        ];
       return deviationAirTemperature;
     } catch (error) {
       const deviationAirTemperature = 0;
@@ -237,23 +237,23 @@ const ModalBlock = ({
     let angle = 0;
 
     if (returnHighEntranceInBulletin() === 200) {
-      angle = +directorateAngleWind + 1;
+      angle = +meteoData.directorateAngleWind + 1;
     } else if (returnHighEntranceInBulletin() === 400) {
-      angle = +directorateAngleWind + 2;
+      angle = +meteoData.directorateAngleWind + 2;
     } else if (returnHighEntranceInBulletin() === 800) {
-      angle = +directorateAngleWind + 3;
+      angle = +meteoData.directorateAngleWind + 3;
     } else if (returnHighEntranceInBulletin() === 1200) {
-      angle = +directorateAngleWind + 3;
+      angle = +meteoData.directorateAngleWind + 3;
     } else if (returnHighEntranceInBulletin() === 1600) {
-      angle = +directorateAngleWind + 4;
+      angle = +meteoData.directorateAngleWind + 4;
     } else if (returnHighEntranceInBulletin() === 2000) {
-      angle = +directorateAngleWind + 4;
+      angle = +meteoData.directorateAngleWind + 4;
     } else if (returnHighEntranceInBulletin() === 2400) {
-      angle = +directorateAngleWind + 4;
+      angle = +meteoData.directorateAngleWind + 4;
     } else if (returnHighEntranceInBulletin() === 3000) {
-      angle = +directorateAngleWind + 5;
+      angle = +meteoData.directorateAngleWind + 5;
     } else if (returnHighEntranceInBulletin() === 4000) {
-      angle = +directorateAngleWind + 5;
+      angle = +meteoData.directorateAngleWind + 5;
     }
 
     return angle;
@@ -262,7 +262,7 @@ const ModalBlock = ({
   const returnSpeedNediumWind = () => {
     try {
       const speedNediumWind =
-        windSpeedObj[windSpeed][returnHighEntranceInBulletin()];
+        windSpeedObj[meteoData.windSpeed][returnHighEntranceInBulletin()];
       return speedNediumWind;
     } catch (error) {
       const speedNediumWind = 0;
@@ -279,55 +279,55 @@ const ModalBlock = ({
       let dXt = 0;
       let dXv0 = 0;
 
-      if (trajectory.toLocaleLowerCase() === 'н') {
+      if (basicData.basicData.trajectory === 0) {
         z = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= supportingRangeCalculation()).Z;
         dZw = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= supportingRangeCalculation()).dZw;
         dXw = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= supportingRangeCalculation()).dXw;
         dXh = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= supportingRangeCalculation()).dXh;
         dXt = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= supportingRangeCalculation()).dXt;
         dXv0 = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= supportingRangeCalculation()).dXv0;
       } else {
         z = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= supportingRangeCalculation()).Z;
         dZw = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= supportingRangeCalculation()).dZw;
         dXw = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= supportingRangeCalculation()).dXw;
         dXh = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= supportingRangeCalculation()).dXh;
         dXt = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= supportingRangeCalculation()).dXt;
         dXv0 = shotingTables
-          .filter(el => el.name === nameCharge.toLocaleLowerCase())
-          .filter(el => el.trajectory === trajectory.toLocaleLowerCase())
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= supportingRangeCalculation()).dXv0;
       }
       return {z, dZw, dXw, dXh, dXt, dXv0};
@@ -493,6 +493,17 @@ const ModalBlock = ({
     return newStr;
   };
 
+  // const test = () => {
+  //   changeTargetData(
+  //     'amendmentRange',
+  //     totalAmendmentsCalculation().totalAmendmentInRange,
+  //   );
+  //   changeTargetData(
+  //     'amendmentAngle',
+  //     totalAmendmentsCalculation().totalAmendmentInDirection,
+  //   );
+  // };
+
   return (
     <ScrollView>
       <View style={styles.centeredView}>
@@ -505,22 +516,7 @@ const ModalBlock = ({
           }}>
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <MeteoData
-                pressure={pressure}
-                setPressure={setPressure}
-                airTemperature={airTemperature}
-                setAirTemperature={setAirTemperature}
-                directorateAngleWind={directorateAngleWind}
-                setDirectorateAngleWind={setDirectorateAngleWind}
-                windSpeed={windSpeed}
-                setWindSpeed={setWindSpeed}
-                deviationInitialSpeed={deviationInitialSpeed}
-                setDeviationInitialSpeed={setDeviationInitialSpeed}
-                chargeTemperature={chargeTemperature}
-                setСhargeTemperature={setСhargeTemperature}
-                heightWeatherPost={heightWeatherPost}
-                setHeightWeatherPost={setHeightWeatherPost}
-              />
+              <MeteoData value={meteoData} setValue={changeMeteoData} />
               <View
                 style={{
                   flexDirection: 'row',
@@ -546,7 +542,9 @@ const ModalBlock = ({
               </View>
               <Pressable
                 style={[styles.button, styles.buttonClose]}
-                onPress={() => setModalVisible(!modalVisible)}>
+                onPress={() => {
+                  setModalVisible(!modalVisible);
+                }}>
                 <Text style={styles.textStyle}>Закрыть</Text>
               </Pressable>
             </View>
