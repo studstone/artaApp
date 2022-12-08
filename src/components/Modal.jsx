@@ -81,7 +81,6 @@ const ModalBlock = ({
       // saving error
     }
   };
-
   const deviationInitialSpeedChargeCalculation = () => {
     try {
       let nameCharge = basicData.nameCharge;
@@ -91,7 +90,6 @@ const ModalBlock = ({
       } else if (nameCharge === 4) {
         nameCharge = 3;
       }
-
       const supportTemperature = temperatureCharge
         .filter(el => el.name === nameCharge)
         .find(el => el.temperature >= +meteoData.chargeTemperature).temperature;
@@ -155,7 +153,7 @@ const ModalBlock = ({
     try {
       let highEntranceInBulletin = 0;
 
-      if (basicData.basicData.trajectory === 0) {
+      if (basicData.trajectory === 0) {
         highEntranceInBulletin = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
@@ -279,7 +277,7 @@ const ModalBlock = ({
       let dXt = 0;
       let dXv0 = 0;
 
-      if (basicData.basicData.trajectory === 0) {
+      if (basicData.trajectory === 0) {
         z = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
@@ -493,16 +491,16 @@ const ModalBlock = ({
     return newStr;
   };
 
-  // const test = () => {
-  //   changeTargetData(
-  //     'amendmentRange',
-  //     totalAmendmentsCalculation().totalAmendmentInRange,
-  //   );
-  //   changeTargetData(
-  //     'amendmentAngle',
-  //     totalAmendmentsCalculation().totalAmendmentInDirection,
-  //   );
-  // };
+  const test = () => {
+    changeTargetData(
+      'amendmentRange',
+      totalAmendmentsCalculation().totalAmendmentInRange,
+    );
+    changeTargetData(
+      'amendmentAngle',
+      totalAmendmentsCalculation().totalAmendmentInDirection,
+    );
+  };
 
   return (
     <ScrollView>
@@ -544,6 +542,7 @@ const ModalBlock = ({
                 style={[styles.button, styles.buttonClose]}
                 onPress={() => {
                   setModalVisible(!modalVisible);
+                  test();
                 }}>
                 <Text style={styles.textStyle}>Закрыть</Text>
               </Pressable>

@@ -37,7 +37,7 @@ const inputs = {
   amendmentAngle: {
     keyboardType: 'numbers-and-punctuation',
     placeholder: 'Попр. в напр.',
-    maxLength: 4,
+    maxLength: 5,
     text: 'Δδ:',
   },
 };

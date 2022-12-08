@@ -78,7 +78,6 @@ const BatteryCommander = () => {
   const [activeTarget, setActiveTarget] = React.useState(null);
 
   const [targetData, setTargetData] = React.useState({...initTargetData});
-  console.log(targetData);
   const [burstData, setBurstData] = React.useState({...initBurstData});
 
   const [isLoading, setIsLoading] = React.useState(true);
@@ -180,22 +179,33 @@ const BatteryCommander = () => {
   };
 
   /** расчет х,у цели*/
-  const coordinateTargetСalculation = React.useCallback(() => {
-    const targetX = Math.round(
-      +OPData.coordinateOPX +
-        targetData.rangeTarget *
-          Math.cos(targetData.angleTarget * 6 * (Math.PI / 180)),
-    );
+  const coordinateTargetСalculation = () => {
+    let targetX = 0;
+    let targetY = 0;
+    if (
+      OPData.coordinateOPX.length >= 5 &&
+      OPData.coordinateOPX.length >= 5 &&
+      targetData.rangeTarget.length >= 3 &&
+      targetData.angleTarget.length >= 3
+    ) {
+      targetX = Math.round(
+        +OPData.coordinateOPX +
+          targetData.rangeTarget *
+            Math.cos(targetData.angleTarget * 6 * (Math.PI / 180)),
+      );
 
-    const targetY = Math.round(
-      +OPData.coordinateOPY +
-        targetData.rangeTarget *
-          Math.sin(targetData.angleTarget * 6 * (Math.PI / 180)),
-    );
-    return {targetX, targetY};
-  }, [targetData.rangeTarget, targetData.angleTarget.length]);
+      targetY = Math.round(
+        +OPData.coordinateOPY +
+          targetData.rangeTarget *
+            Math.sin(targetData.angleTarget * 6 * (Math.PI / 180)),
+      );
+      return {targetX, targetY};
+    } else {
+      return {targetX, targetY};
+    }
+  };
   /*расчет топо дальности*/
-  const rangeСalculation = () => {
+  const rangeСalculation = React.useCallback(() => {
     let topographicRange = 0;
     if (targetData.coordinateVariant) {
       topographicRange = Math.round(
@@ -209,18 +219,27 @@ const BatteryCommander = () => {
       topographicRange = Math.round(
         Math.sqrt(
           Math.pow(
-            coordinateTargetСalculation().targetX - FPData.coordinateFPX,
+            coordinateTargetСalculation.targetX - FPData.coordinateFPX,
             2,
           ) +
             Math.pow(
-              coordinateTargetСalculation().targetY - FPData.coordinateFPY,
+              coordinateTargetСalculation.targetY - FPData.coordinateFPY,
               2,
             ),
         ),
       );
       return topographicRange;
     }
-  };
+  }, [
+    (targetData.coordinateTargetX.length >= 5 &&
+      targetData.coordinateTargetY.length >= 5 &&
+      FPData.coordinateFPX.length >= 5 &&
+      FPData.coordinateFPY.length) ||
+      (FPData.coordinateFPX.length >= 5 &&
+        FPData.coordinateFPY.length >= 5 &&
+        coordinateTargetСalculation.targetX.length >= 5 &&
+        coordinateTargetСalculation.targetY.length >= 5),
+  ]);
   /*расчет исчисленной дальности*/
   const calculatedRangeСalculation = () => {
     const calculatedRange = rangeСalculation() + +targetData.amendmentRange;
@@ -398,8 +417,8 @@ const BatteryCommander = () => {
     } else {
       directionalAngle =
         (Math.atan2(
-          coordinateTargetСalculation().targetY - FPData.coordinateFPY,
-          coordinateTargetСalculation().targetX - FPData.coordinateFPX,
+          coordinateTargetСalculation.targetY - FPData.coordinateFPY,
+          coordinateTargetСalculation.targetX - FPData.coordinateFPX,
         ) *
           180) /
         Math.PI /
@@ -831,7 +850,7 @@ const BatteryCommander = () => {
             </TouchableOpacity>
             {/* Установки */}
             <FiringEquipment
-              rangeСalculation={rangeFinalСalculation}
+              rangeСalculation={rangeСalculation}
               replaceAngle={replaceAngle}
               angleFromMainStreamСalculation={angleFromMainStreamСalculation}
               amendmentRange={targetData.amendmentRange}
