@@ -28,7 +28,6 @@ export default React.memo(function Input({
           style={styles.input}
           keyboardType={`${keyboardType}`}
           onChangeText={setState}
-          // onEndEditing={event => setState(event.nativeEvent.text)}
           value={`${state}`}
           placeholder={`${placeholder}`}
           placeholderTextColor={`${placeholderTextColor}`}

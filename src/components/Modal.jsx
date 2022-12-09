@@ -30,13 +30,13 @@ const initMeteoData = {
   heightWeatherPost: '',
 };
 
-const ModalBlock = ({
+export default React.memo(function ModalBlock({
   angle,
   heightFP,
   rangeСalculation,
   basicData,
   changeTargetData,
-}) => {
+}) {
   const [modalVisible, setModalVisible] = React.useState(false);
 
   const [meteoData, setMeteoData] = React.useState({...initMeteoData});
@@ -81,7 +81,8 @@ const ModalBlock = ({
       // saving error
     }
   };
-  const deviationInitialSpeedChargeCalculation = () => {
+
+  const deviationInitialSpeedChargeCalculation = React.useMemo(() => {
     try {
       let nameCharge = basicData.nameCharge;
 
@@ -108,12 +109,11 @@ const ModalBlock = ({
 
       return dVoCharge;
     }
-  };
+  }, [basicData.nameCharge, meteoData.chargeTemperature]);
   /** рассчитываем dV0 суммарное */
   const totalDeviationInitialSpeedCalculation = () => {
     const totalDeviationInitialSpeed =
-      +meteoData.deviationInitialSpeed +
-      deviationInitialSpeedChargeCalculation();
+      +meteoData.deviationInitialSpeed + deviationInitialSpeedChargeCalculation;
 
     return totalDeviationInitialSpeed;
   };
@@ -122,31 +122,6 @@ const ModalBlock = ({
     const deviationGroundPressure =
       750 - +meteoData.pressure + (meteoData.heightWeatherPost - heightFP) / 10;
     return deviationGroundPressure;
-  };
-  /**рассчитываю опорную дальность */
-  const supportingRangeCalculation = () => {
-    try {
-      let supportingRange = 0;
-
-      if (basicData.trajectory === 0) {
-        supportingRange = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range >= rangeСalculation).range;
-      } else {
-        supportingRange = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range <= rangeСalculation).range;
-      }
-      return supportingRange;
-    } catch (error) {
-      const supportingRange = 0;
-
-      return supportingRange;
-    }
   };
   /** вытаскиваем из массива высоту взода в бюллетень */
   const returnHighEntranceInBulletin = () => {
@@ -281,52 +256,52 @@ const ModalBlock = ({
         z = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range >= supportingRangeCalculation()).Z;
+          .find(el => el.range >= rangeСalculation).Z;
         dZw = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range >= supportingRangeCalculation()).dZw;
+          .find(el => el.range >= rangeСalculation).dZw;
         dXw = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range >= supportingRangeCalculation()).dXw;
+          .find(el => el.range >= rangeСalculation).dXw;
         dXh = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range >= supportingRangeCalculation()).dXh;
+          .find(el => el.range >= rangeСalculation).dXh;
         dXt = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range >= supportingRangeCalculation()).dXt;
+          .find(el => el.range >= rangeСalculation).dXt;
         dXv0 = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range >= supportingRangeCalculation()).dXv0;
+          .find(el => el.range >= rangeСalculation).dXv0;
       } else {
         z = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range <= supportingRangeCalculation()).Z;
+          .find(el => el.range <= rangeСalculation).Z;
         dZw = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range <= supportingRangeCalculation()).dZw;
+          .find(el => el.range <= rangeСalculation).dZw;
         dXw = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range <= supportingRangeCalculation()).dXw;
+          .find(el => el.range <= rangeСalculation).dXw;
         dXh = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range <= supportingRangeCalculation()).dXh;
+          .find(el => el.range <= rangeСalculation).dXh;
         dXt = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range <= supportingRangeCalculation()).dXt;
+          .find(el => el.range <= rangeСalculation).dXt;
         dXv0 = shotingTables
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range <= supportingRangeCalculation()).dXv0;
+          .find(el => el.range <= rangeСalculation).dXv0;
       }
       return {z, dZw, dXw, dXh, dXt, dXv0};
     } catch (err) {
@@ -469,18 +444,34 @@ const ModalBlock = ({
   };
   /**расчитываем суммарные поправки */
   const totalAmendmentsCalculation = () => {
-    const totalAmendmentInRange = Math.round(
-      0.1 * returnDataST().dXw * returnLinkingWinds().Wx +
-        0.1 * returnDataST().dXh * deviationGroundPressureCalculation() +
-        0.1 * returnDataST().dXt * returnDeviationAirTemperature() +
-        returnDataST().dXv0 * totalDeviationInitialSpeedCalculation(),
-    );
-    const totalAmendmentInDirection = (
-      (returnDataST().z + 0.1 * returnDataST().dZw * returnLinkingWinds().Wz) *
-      0.01
-    ).toFixed(2);
+    let totalAmendmentInRange = 0;
+    let totalAmendmentInDirection = 0;
 
-    return {totalAmendmentInRange, totalAmendmentInDirection};
+    if (
+      meteoData.airTemperature !== '' &&
+      meteoData.chargeTemperature !== '' &&
+      meteoData.deviationInitialSpeed !== '' &&
+      meteoData.directorateAngleWind !== '' &&
+      meteoData.heightWeatherPost !== '' &&
+      meteoData.pressure !== '' &&
+      meteoData.windSpeed !== ''
+    ) {
+      totalAmendmentInRange = Math.round(
+        0.1 * returnDataST().dXw * returnLinkingWinds().Wx +
+          0.1 * returnDataST().dXh * deviationGroundPressureCalculation() +
+          0.1 * returnDataST().dXt * returnDeviationAirTemperature() +
+          returnDataST().dXv0 * totalDeviationInitialSpeedCalculation(),
+      );
+      totalAmendmentInDirection = (
+        (returnDataST().z +
+          0.1 * returnDataST().dZw * returnLinkingWinds().Wz) *
+        0.01
+      ).toFixed(2);
+
+      return {totalAmendmentInRange, totalAmendmentInDirection};
+    } else {
+      return {totalAmendmentInRange, totalAmendmentInDirection};
+    }
   };
   /*преобразовать точку в пробел */
   const replaceAngle = angle => {
@@ -492,14 +483,24 @@ const ModalBlock = ({
   };
 
   const test = () => {
-    changeTargetData(
-      'amendmentRange',
-      totalAmendmentsCalculation().totalAmendmentInRange,
-    );
-    changeTargetData(
-      'amendmentAngle',
-      totalAmendmentsCalculation().totalAmendmentInDirection,
-    );
+    if (
+      meteoData.airTemperature !== '' &&
+      meteoData.chargeTemperature !== '' &&
+      meteoData.deviationInitialSpeed !== '' &&
+      meteoData.directorateAngleWind !== '' &&
+      meteoData.heightWeatherPost !== '' &&
+      meteoData.pressure !== '' &&
+      meteoData.windSpeed !== ''
+    ) {
+      changeTargetData(
+        'amendmentRange',
+        totalAmendmentsCalculation().totalAmendmentInRange,
+      );
+      changeTargetData(
+        'amendmentAngle',
+        totalAmendmentsCalculation().totalAmendmentInDirection,
+      );
+    }
   };
 
   return (
@@ -557,7 +558,7 @@ const ModalBlock = ({
       </View>
     </ScrollView>
   );
-};
+});
 
 const styles = StyleSheet.create({
   centeredView: {
@@ -640,4 +641,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ModalBlock;
+// export default ModalBlock;

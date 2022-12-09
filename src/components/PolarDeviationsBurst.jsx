@@ -8,11 +8,13 @@ const inputs = {
     placeholder: 'Дальн. разрыва',
     text: 'Др:',
     keyboardType: 'numeric',
+    maxLength: 4,
   },
   angleBurst: {
     placeholder: 'Угол разрыва',
     text: 'УГр:',
     keyboardType: 'numbers-and-punctuation',
+    maxLength: 5,
   },
 };
 
@@ -34,7 +36,7 @@ export default React.memo(function PolarDeviationsBurst({
             setState={value => setValue(key, value)}
             placeholder={item.placeholder}
             placeholderTextColor={'black'}
-            maxLength={4}
+            maxLength={item.maxLength}
             text={item.text}
             style={styles.inputWrapper}
           />

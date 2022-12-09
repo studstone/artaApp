@@ -30,7 +30,7 @@ const FiringEquipment = ({
               fontSize: 18,
               marginBottom: 5,
             }}>
-            {`Дт: ${rangeСalculation()}`}
+            {`Дт: ${rangeСalculation}`}
           </Text>
           <Text
             style={{
@@ -38,7 +38,7 @@ const FiringEquipment = ({
               fontSize: 18,
               marginBottom: 5,
             }}>
-            {`δт: ${replaceAngle(angleFromMainStreamСalculation())}`}
+            {`δт: ${replaceAngle(angleFromMainStreamСalculation)}`}
           </Text>
           <Text
             style={{
@@ -61,7 +61,7 @@ const FiringEquipment = ({
               color: '#750000',
               fontSize: 18,
             }}>
-            {`Ди: ${calculatedRangeСalculation()}`}
+            {`Ди: ${calculatedRangeСalculation}`}
           </Text>
         </View>
         <View
@@ -74,7 +74,7 @@ const FiringEquipment = ({
               fontSize: 18,
               marginBottom: 5,
             }}>
-            {`У.вз: ${choosingFuseInstallation()}`}
+            {`У.вз: ${choosingFuseInstallation}`}
           </Text>
           <Text
             style={{
@@ -82,7 +82,7 @@ const FiringEquipment = ({
               fontSize: 18,
               marginBottom: 5,
             }}>
-            {`Пр: ${rangeFinalСalculation()}`}
+            {`Пр: ${rangeFinalСalculation}`}
           </Text>
           <Text
             style={{
@@ -90,9 +90,9 @@ const FiringEquipment = ({
               fontSize: 18,
               marginBottom: 5,
             }}>
-            {excessСalculation() === 'NaN'
+            {excessСalculation === 'NaN'
               ? 'Ур: 30-00'
-              : `Ур: ${replaceAngle(excessСalculation())}`}
+              : `Ур: ${replaceAngle(excessСalculation)}`}
           </Text>
           <Text
             style={{
@@ -100,11 +100,9 @@ const FiringEquipment = ({
               fontSize: 18,
               marginBottom: 5,
             }}>
-            {calculatedAngleFromMainStreamСalculation() === '0.00'
+            {calculatedAngleFromMainStreamСalculation === '0.00'
               ? 'δи: ОН'
-              : `δи: ${replaceAngle(
-                  calculatedAngleFromMainStreamСalculation(),
-                )}`}
+              : `δи: ${replaceAngle(calculatedAngleFromMainStreamСalculation)}`}
           </Text>
         </View>
         <View
@@ -117,7 +115,7 @@ const FiringEquipment = ({
               fontSize: 18,
               marginBottom: 5,
             }}>
-            {jumpCalculation()}
+            {jumpCalculation}
           </Text>
           <Text
             style={{
@@ -125,7 +123,7 @@ const FiringEquipment = ({
               fontSize: 18,
               marginBottom: 5,
             }}>
-            {replaceAngle(fanCalculation())}
+            {replaceAngle(fanCalculation)}
           </Text>
           <Text
             style={{
@@ -133,7 +131,7 @@ const FiringEquipment = ({
               fontSize: 18,
               marginBottom: 5,
             }}>
-            {intervalFanCalculation()}
+            {intervalFanCalculation}
           </Text>
           <Text
             style={{
