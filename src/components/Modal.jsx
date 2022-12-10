@@ -36,6 +36,8 @@ export default React.memo(function ModalBlock({
   rangeСalculation,
   basicData,
   changeTargetData,
+  targetData,
+  replaceAngle,
 }) {
   const [modalVisible, setModalVisible] = React.useState(false);
 
@@ -448,49 +450,44 @@ export default React.memo(function ModalBlock({
     let totalAmendmentInDirection = 0;
 
     if (
-      meteoData.airTemperature !== '' &&
-      meteoData.chargeTemperature !== '' &&
-      meteoData.deviationInitialSpeed !== '' &&
-      meteoData.directorateAngleWind !== '' &&
-      meteoData.heightWeatherPost !== '' &&
-      meteoData.pressure !== '' &&
-      meteoData.windSpeed !== ''
+      (targetData.coordinateTargetX !== '' &&
+        targetData.coordinateTargetY !== '') ||
+      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
     ) {
-      totalAmendmentInRange = Math.round(
-        0.1 * returnDataST().dXw * returnLinkingWinds().Wx +
-          0.1 * returnDataST().dXh * deviationGroundPressureCalculation() +
-          0.1 * returnDataST().dXt * returnDeviationAirTemperature() +
-          returnDataST().dXv0 * totalDeviationInitialSpeedCalculation(),
-      );
-      totalAmendmentInDirection = (
-        (returnDataST().z +
-          0.1 * returnDataST().dZw * returnLinkingWinds().Wz) *
-        0.01
-      ).toFixed(2);
-
-      return {totalAmendmentInRange, totalAmendmentInDirection};
+      if (
+        meteoData.airTemperature !== '' &&
+        meteoData.chargeTemperature !== '' &&
+        meteoData.deviationInitialSpeed !== '' &&
+        meteoData.directorateAngleWind !== '' &&
+        meteoData.heightWeatherPost !== '' &&
+        meteoData.pressure !== '' &&
+        meteoData.windSpeed !== ''
+      ) {
+        totalAmendmentInRange = Math.round(
+          0.1 * returnDataST().dXw * returnLinkingWinds().Wx +
+            0.1 * returnDataST().dXh * deviationGroundPressureCalculation() +
+            0.1 * returnDataST().dXt * returnDeviationAirTemperature() +
+            returnDataST().dXv0 * totalDeviationInitialSpeedCalculation(),
+        );
+        totalAmendmentInDirection = (
+          (returnDataST().z +
+            0.1 * returnDataST().dZw * returnLinkingWinds().Wz) *
+          0.01
+        ).toFixed(2);
+        return {totalAmendmentInRange, totalAmendmentInDirection};
+      } else {
+        return {totalAmendmentInRange, totalAmendmentInDirection};
+      }
     } else {
       return {totalAmendmentInRange, totalAmendmentInDirection};
     }
   }, [meteoData]);
-  /*преобразовать точку в пробел */
-  const replaceAngle = angle => {
-    const reg = /\./;
-    const str = angle.toString();
-    const newStr = str.replace(reg, '-');
-
-    return newStr;
-  };
 
   const test = () => {
     if (
-      meteoData.airTemperature !== '' &&
-      meteoData.chargeTemperature !== '' &&
-      meteoData.deviationInitialSpeed !== '' &&
-      meteoData.directorateAngleWind !== '' &&
-      meteoData.heightWeatherPost !== '' &&
-      meteoData.pressure !== '' &&
-      meteoData.windSpeed !== ''
+      (targetData.coordinateTargetX !== '' &&
+        targetData.coordinateTargetY !== '') ||
+      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
     ) {
       changeTargetData(
         'amendmentRange',

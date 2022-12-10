@@ -14,7 +14,7 @@ const inputs = {
     placeholder: 'Температура воздуха',
     keyboardType: 'numeric',
     text: 'Тв:',
-    maxLength: 2,
+    maxLength: 3,
   },
   directorateAngleWind: {
     placeholder: 'Направление ветра',

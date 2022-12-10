@@ -19,10 +19,9 @@ import DescriptionTarget from '../components/DescriptionTarget';
 import TargetsList from '../components/TargetsList';
 import CoordinatsVariant from '../components/CoordinatsVariant';
 import FiringEquipmentRGM from '../components/FiringEquipmentRGM';
-import PolarDeviationsBurst from '../components/PolarDeviationsBurst';
-import CardinalPointsBurst from '../components/CardinalPointsBurst';
 
 import shotingTables from '../DB/shotingTables';
+import FireCorrection from '../components/FireCorrection';
 
 const initBasicData = {
   fuseName: null,
@@ -197,29 +196,37 @@ const BatteryCommander = () => {
   const rangeСalculation = React.useMemo(() => {
     let topographicRange = 0;
 
-    if (targetData.coordinateVariant) {
-      topographicRange = Math.round(
-        Math.sqrt(
-          Math.pow(targetData.coordinateTargetX - FPData.coordinateFPX, 2) +
-            Math.pow(targetData.coordinateTargetY - FPData.coordinateFPY, 2),
-        ),
-      );
+    if (
+      (targetData.coordinateTargetX !== '' &&
+        targetData.coordinateTargetY !== '') ||
+      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
+    ) {
+      if (targetData.coordinateVariant) {
+        topographicRange = Math.round(
+          Math.sqrt(
+            Math.pow(targetData.coordinateTargetX - FPData.coordinateFPX, 2) +
+              Math.pow(targetData.coordinateTargetY - FPData.coordinateFPY, 2),
+          ),
+        );
 
-      return topographicRange;
-    } else {
-      topographicRange = Math.round(
-        Math.sqrt(
-          Math.pow(
-            coordinateTargetСalculation.targetX - FPData.coordinateFPX,
-            2,
-          ) +
+        return topographicRange;
+      } else {
+        topographicRange = Math.round(
+          Math.sqrt(
             Math.pow(
-              coordinateTargetСalculation.targetY - FPData.coordinateFPY,
+              coordinateTargetСalculation.targetX - FPData.coordinateFPX,
               2,
-            ),
-        ),
-      );
+            ) +
+              Math.pow(
+                coordinateTargetСalculation.targetY - FPData.coordinateFPY,
+                2,
+              ),
+          ),
+        );
 
+        return topographicRange;
+      }
+    } else {
       return topographicRange;
     }
   }, [
@@ -247,81 +254,96 @@ const BatteryCommander = () => {
       let installationFuse = '';
       let time = 0;
       let Vd = 0;
-
-      if (basicData.trajectory === 0) {
-        supportingRange = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range >= rangeСalculation).range;
-        supportingAim = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range >= rangeСalculation).aim;
-        dXtis = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range >= rangeСalculation).dXtis;
-        dRange = supportingRange - rangeСalculation;
-        installationFuse = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range >= rangeСalculation).installationFuse;
-        time = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range >= rangeСalculation).Tc;
-        Vd = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range >= rangeСalculation).Vd;
+      if (
+        (targetData.coordinateTargetX !== '' &&
+          targetData.coordinateTargetY !== '') ||
+        (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
+      ) {
+        if (basicData.trajectory === 0) {
+          supportingRange = shotingTables
+            .filter(el => el.fuse === basicData.fuseName)
+            .filter(el => el.name === basicData.nameCharge)
+            .filter(el => el.trajectory === basicData.trajectory)
+            .find(el => el.range >= rangeСalculation).range;
+          supportingAim = shotingTables
+            .filter(el => el.fuse === basicData.fuseName)
+            .filter(el => el.name === basicData.nameCharge)
+            .filter(el => el.trajectory === basicData.trajectory)
+            .find(el => el.range >= rangeСalculation).aim;
+          dXtis = shotingTables
+            .filter(el => el.fuse === basicData.fuseName)
+            .filter(el => el.name === basicData.nameCharge)
+            .filter(el => el.trajectory === basicData.trajectory)
+            .find(el => el.range >= rangeСalculation).dXtis;
+          dRange = supportingRange - rangeСalculation;
+          installationFuse = shotingTables
+            .filter(el => el.fuse === basicData.fuseName)
+            .filter(el => el.name === basicData.nameCharge)
+            .filter(el => el.trajectory === basicData.trajectory)
+            .find(el => el.range >= rangeСalculation).installationFuse;
+          time = shotingTables
+            .filter(el => el.fuse === basicData.fuseName)
+            .filter(el => el.name === basicData.nameCharge)
+            .filter(el => el.trajectory === basicData.trajectory)
+            .find(el => el.range >= rangeСalculation).Tc;
+          Vd = shotingTables
+            .filter(el => el.fuse === basicData.fuseName)
+            .filter(el => el.name === basicData.nameCharge)
+            .filter(el => el.trajectory === basicData.trajectory)
+            .find(el => el.range >= rangeСalculation).Vd;
+        } else {
+          supportingRange = shotingTables
+            .filter(el => el.fuse === basicData.fuseName)
+            .filter(el => el.name === basicData.nameCharge)
+            .filter(el => el.trajectory === basicData.trajectory)
+            .find(el => el.range <= rangeСalculation).range;
+          supportingAim = shotingTables
+            .filter(el => el.fuse === basicData.fuseName)
+            .filter(el => el.name === basicData.nameCharge)
+            .filter(el => el.trajectory === basicData.trajectory)
+            .find(el => el.range <= rangeСalculation).aim;
+          dXtis = shotingTables
+            .filter(el => el.fuse === basicData.fuseName)
+            .filter(el => el.name === basicData.nameCharge)
+            .filter(el => el.trajectory === basicData.trajectory)
+            .find(el => el.range <= rangeСalculation).dXtis;
+          dRange = rangeСalculation - supportingRange;
+          installationFuse = shotingTables
+            .filter(el => el.fuse === basicData.fuseName)
+            .filter(el => el.name === basicData.nameCharge)
+            .filter(el => el.trajectory === basicData.trajectory)
+            .find(el => el.range <= rangeСalculation).installationFuse;
+          time = shotingTables
+            .filter(el => el.fuse === basicData.fuseName)
+            .filter(el => el.name === basicData.nameCharge)
+            .filter(el => el.trajectory === basicData.trajectory)
+            .find(el => el.range <= rangeСalculation).Tc;
+          Vd = shotingTables
+            .filter(el => el.fuse === basicData.fuseName)
+            .filter(el => el.name === basicData.nameCharge)
+            .filter(el => el.trajectory === basicData.trajectory)
+            .find(el => el.range <= rangeСalculation).Vd;
+        }
+        return {
+          supportingRange,
+          supportingAim,
+          dXtis,
+          dRange,
+          installationFuse,
+          time,
+          Vd,
+        };
       } else {
-        supportingRange = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range <= rangeСalculation).range;
-        supportingAim = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range <= rangeСalculation).aim;
-        dXtis = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range <= rangeСalculation).dXtis;
-        dRange = rangeСalculation - supportingRange;
-        installationFuse = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range <= rangeСalculation).installationFuse;
-        time = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range <= rangeСalculation).Tc;
-        Vd = shotingTables
-          .filter(el => el.fuse === basicData.fuseName)
-          .filter(el => el.name === basicData.nameCharge)
-          .filter(el => el.trajectory === basicData.trajectory)
-          .find(el => el.range <= rangeСalculation).Vd;
+        return {
+          supportingRange,
+          supportingAim,
+          dXtis,
+          dRange,
+          installationFuse,
+          time,
+          Vd,
+        };
       }
-      return {
-        supportingRange,
-        supportingAim,
-        dXtis,
-        dRange,
-        installationFuse,
-        time,
-        Vd,
-      };
     } catch (err) {
       const supportingRange = 0;
       const supportingAim = 0;
@@ -445,17 +467,25 @@ const BatteryCommander = () => {
   const angleFromMainStreamСalculation = React.useMemo(() => {
     let directionAlngle = 0;
 
-    if (angleСalculation >= 52.5 && angleСalculation <= 60) {
-      directionAlngle = angleСalculation - basicData.mainStream - 60;
+    if (
+      (targetData.coordinateTargetX !== '' &&
+        targetData.coordinateTargetY !== '') ||
+      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
+    ) {
+      if (angleСalculation >= 52.5 && angleСalculation <= 60) {
+        directionAlngle = angleСalculation - basicData.mainStream - 60;
+      } else {
+        directionAlngle = angleСalculation - basicData.mainStream;
+      }
+
+      if (directionAlngle < -15) {
+        directionAlngle = directionAlngle + 60;
+      }
+
+      return directionAlngle.toFixed(2);
     } else {
-      directionAlngle = angleСalculation - basicData.mainStream;
+      return directionAlngle;
     }
-
-    if (directionAlngle < -15) {
-      directionAlngle = directionAlngle + 60;
-    }
-
-    return directionAlngle.toFixed(2);
   }, [basicData.mainStream, angleСalculation]);
   // /*расчет исчисленного доворота*/
   const calculatedAngleFromMainStreamСalculation = React.useMemo(() => {
@@ -528,18 +558,26 @@ const BatteryCommander = () => {
   const rangeCommanderCalculation = React.useMemo(() => {
     let topographicRange = 0;
 
-    if (targetData.coordinateVariant) {
-      topographicRange = Math.round(
-        Math.sqrt(
-          Math.pow(targetData.coordinateTargetX - OPData.coordinateOPX, 2) +
-            Math.pow(targetData.coordinateTargetY - OPData.coordinateOPY, 2),
-        ),
-      );
-    } else {
-      topographicRange = targetData.rangeTarget;
-    }
+    if (
+      (targetData.coordinateTargetX !== '' &&
+        targetData.coordinateTargetY !== '') ||
+      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
+    ) {
+      if (targetData.coordinateVariant) {
+        topographicRange = Math.round(
+          Math.sqrt(
+            Math.pow(targetData.coordinateTargetX - OPData.coordinateOPX, 2) +
+              Math.pow(targetData.coordinateTargetY - OPData.coordinateOPY, 2),
+          ),
+        );
+      } else {
+        topographicRange = targetData.rangeTarget;
+      }
 
-    return topographicRange;
+      return topographicRange;
+    } else {
+      return topographicRange;
+    }
   }, [
     targetData.coordinateTargetX,
     targetData.coordinateTargetY,
@@ -551,26 +589,34 @@ const BatteryCommander = () => {
     let directionalAngle = 0;
     let angle = 0;
 
-    if (targetData.coordinateVariant) {
-      directionalAngle =
-        (Math.atan2(
-          targetData.coordinateTargetY - OPData.coordinateOPY,
-          targetData.coordinateTargetX - OPData.coordinateOPX,
-        ) *
-          180) /
-        Math.PI /
-        6;
-    } else {
-      directionalAngle = +targetData.angleTarget;
-    }
+    if (
+      (targetData.coordinateTargetX !== '' &&
+        targetData.coordinateTargetY !== '') ||
+      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
+    ) {
+      if (targetData.coordinateVariant) {
+        directionalAngle =
+          (Math.atan2(
+            targetData.coordinateTargetY - OPData.coordinateOPY,
+            targetData.coordinateTargetX - OPData.coordinateOPX,
+          ) *
+            180) /
+          Math.PI /
+          6;
+      } else {
+        directionalAngle = +targetData.angleTarget;
+      }
 
-    if (directionalAngle < 0) {
-      angle = directionalAngle + 60;
-    } else {
-      angle = directionalAngle;
-    }
+      if (directionalAngle < 0) {
+        angle = directionalAngle + 60;
+      } else {
+        angle = directionalAngle;
+      }
 
-    return angle.toFixed(2);
+      return angle.toFixed(2);
+    } else {
+      return angle;
+    }
   }, [
     targetData.coordinateTargetY,
     OPData.coordinateOPY,
@@ -582,17 +628,24 @@ const BatteryCommander = () => {
     const numberAngle = +angleСalculation;
     const numberAngleCommander = +angleCommanderCalculation;
     let amendmentDisplacement = 0;
+    if (
+      (targetData.coordinateTargetX !== '' &&
+        targetData.coordinateTargetY !== '') ||
+      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
+    ) {
+      if (numberAngle - numberAngleCommander < 0) {
+        amendmentDisplacement = (numberAngle - numberAngleCommander) * -1;
+      } else {
+        amendmentDisplacement = numberAngle - numberAngleCommander;
+      }
 
-    if (numberAngle - numberAngleCommander < 0) {
-      amendmentDisplacement = (numberAngle - numberAngleCommander) * -1;
+      if (amendmentDisplacement >= 30 && amendmentDisplacement <= 60) {
+        return ((amendmentDisplacement - 60) * -1).toFixed(2);
+      } else {
+        return amendmentDisplacement.toFixed(2);
+      }
     } else {
-      amendmentDisplacement = numberAngle - numberAngleCommander;
-    }
-
-    if (amendmentDisplacement >= 30 && amendmentDisplacement <= 60) {
-      return ((amendmentDisplacement - 60) * -1).toFixed(2);
-    } else {
-      return amendmentDisplacement.toFixed(2);
+      return amendmentDisplacement;
     }
   }, [angleСalculation, angleCommanderCalculation]);
   // /*расчет Ку*/
@@ -650,156 +703,6 @@ const BatteryCommander = () => {
       return 0;
     }
   };
-  // /*рассчет корректуры по Дк и УГк*/
-  const proofreadingCalculationFirst = React.useMemo(() => {
-    let proofreadingInAim = 0;
-    let proofreadingInAngle = 0;
-
-    const coordinateX = +OPData.coordinateOPX;
-    const coordinateY = +OPData.coordinateOPY;
-    const angle = +burstData.angleBurst;
-
-    const burstX = Math.round(
-      coordinateX +
-        burstData.rangeBurst * Math.cos(angle * 6 * (Math.PI / 180)),
-    );
-    const burstY = Math.round(
-      coordinateY +
-        burstData.rangeBurst * Math.sin(angle * 6 * (Math.PI / 180)),
-    );
-
-    const topographicRangeBurst = Math.round(
-      Math.sqrt(
-        Math.pow(burstX - FPData.coordinateFPX, 2) +
-          Math.pow(burstY - FPData.coordinateFPY, 2),
-      ),
-    );
-
-    const directionalAngle =
-      (Math.atan2(
-        burstY - FPData.coordinateFPY,
-        burstX - FPData.coordinateFPX,
-      ) *
-        180) /
-      Math.PI /
-      6;
-
-    let angleFPInBurst = 0;
-    let directionAlngle = 0;
-
-    if (directionalAngle < 0) {
-      angleFPInBurst = directionalAngle + 60;
-    } else {
-      angleFPInBurst = directionalAngle;
-    }
-
-    if (angleFPInBurst >= 52.5 && angleFPInBurst <= 60) {
-      directionAlngle = angleFPInBurst - basicData.mainStream - 60;
-    } else {
-      directionAlngle = angleFPInBurst - basicData.mainStream;
-    }
-
-    if (burstData.rangeBurst === '' || burstData.angleBurst === '') {
-      proofreadingInAngle = 0;
-      proofreadingInAim = 0;
-    } else {
-      if (basicData.trajectory === 0) {
-        proofreadingInAim = Math.round(
-          (rangeСalculation - topographicRangeBurst) / returnDataST.dXtis,
-        );
-      } else {
-        proofreadingInAim = Math.round(
-          ((rangeСalculation - topographicRangeBurst) / returnDataST.dXtis) *
-            -1,
-        );
-      }
-
-      proofreadingInAngle = (
-        angleFromMainStreamСalculation - directionAlngle
-      ).toFixed(2);
-    }
-    return {proofreadingInAngle, proofreadingInAim};
-  }, [burstData.angleBurst, burstData.rangeBurst]);
-  // /*рассчет корректуры ПКсс*/
-  const proofreadingCalculationSecond = React.useMemo(() => {
-    let proofreadingInAim = 0;
-    let proofreadingInAngle = 0;
-    let targetX = 0;
-    let targetY = 0;
-    const coordinateX = +OPData.coordinateOPX;
-    const coordinateY = +OPData.coordinateOPY;
-    const angle = +targetData.angleTarget;
-
-    if (targetData.coordinateVariant) {
-      targetX = +targetData.coordinateTargetX;
-      targetY = +targetData.coordinateTargetY;
-    } else {
-      targetX = Math.round(
-        coordinateX +
-          targetData.rangeTarget * Math.cos(angle * 6 * (Math.PI / 180)),
-      );
-      targetY = Math.round(
-        coordinateY +
-          targetData.rangeTarget * Math.sin(angle * 6 * (Math.PI / 180)),
-      );
-    }
-
-    const burstX = +targetX + +burstData.north - +burstData.south;
-    const burstY = +targetY + +burstData.east - +burstData.west;
-
-    const topographicRangeBurst = Math.round(
-      Math.sqrt(
-        Math.pow(burstX - FPData.coordinateFPX, 2) +
-          Math.pow(burstY - FPData.coordinateFPY, 2),
-      ),
-    );
-
-    const directionalAngle =
-      (Math.atan2(
-        burstY - FPData.coordinateFPY,
-        burstX - FPData.coordinateFPX,
-      ) *
-        180) /
-      Math.PI /
-      6;
-
-    let angleFPInBurst = 0;
-    let directionAlngle = 0;
-
-    if (directionalAngle < 0) {
-      angleFPInBurst = directionalAngle + 60;
-    } else {
-      angleFPInBurst = directionalAngle;
-    }
-
-    if (angleFPInBurst >= 52.5 && angleFPInBurst <= 60) {
-      directionAlngle = angleFPInBurst - basicData.mainStream - 60;
-    } else {
-      directionAlngle = angleFPInBurst - basicData.mainStream;
-    }
-
-    if (rangeСalculation === 0 || returnDataST.dXtis === 0) {
-      proofreadingInAngle = 0;
-      proofreadingInAim = 0;
-    } else {
-      if (basicData.trajectory === 0) {
-        proofreadingInAim = Math.round(
-          (rangeСalculation - topographicRangeBurst) / returnDataST.dXtis,
-        );
-      } else {
-        proofreadingInAim = Math.round(
-          ((rangeСalculation - topographicRangeBurst) / returnDataST.dXtis) *
-            -1,
-        );
-      }
-
-      proofreadingInAngle = (
-        angleFromMainStreamСalculation - directionAlngle.toFixed(2)
-      ).toFixed(2);
-    }
-
-    return {proofreadingInAngle, proofreadingInAim};
-  }, [burstData.north || burstData.south || burstData.east || burstData.we]);
   // /*преобразовать точку в пробел */
   const replaceAngle = angle => {
     const reg = /\./;
@@ -836,6 +739,8 @@ const BatteryCommander = () => {
             heightFP={FPData.heightFP}
             basicData={basicData}
             changeTargetData={changeTargetData}
+            targetData={targetData}
+            replaceAngle={replaceAngle}
           />
           <View>
             {/* Вхoдные данные */}
@@ -994,24 +899,17 @@ const BatteryCommander = () => {
               </Text>
             </View>
             {/* Рассчет коррекур */}
-            <PolarDeviationsBurst
-              value={burstData}
+            <FireCorrection
+              FPData={FPData}
+              OPData={OPData}
+              burstData={burstData}
+              basicData={basicData}
+              targetData={targetData}
+              rangeСalculation={rangeСalculation}
               setValue={changeBurstData}
-              proofreadingInAim={proofreadingCalculationFirst.proofreadingInAim}
-              proofreadingInAngle={replaceAngle(
-                proofreadingCalculationFirst.proofreadingInAngle,
-              )}
-            />
-            {/* Рассчет коррекур */}
-            <CardinalPointsBurst
-              value={burstData}
-              setValue={changeBurstData}
-              proofreadingInAim={
-                proofreadingCalculationSecond.proofreadingInAim
-              }
-              proofreadingInAngle={replaceAngle(
-                proofreadingCalculationSecond.proofreadingInAngle,
-              )}
+              replaceAngle={replaceAngle}
+              returnDataST={returnDataST}
+              angleFromMainStreamСalculation={angleFromMainStreamСalculation}
             />
           </View>
         </ScrollView>
