@@ -1,7 +1,7 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
-import Input from './Input';
+import Input from '../Input';
 
 const inputs = {
   rangeBurst: {
@@ -86,5 +86,3 @@ const styles = StyleSheet.create({
     width: '50%',
   },
 });
-
-// export default PolarDeviationsBurst;

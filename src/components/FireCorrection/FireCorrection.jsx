@@ -1,6 +1,8 @@
 import React from 'react';
+import {Text} from 'react-native';
 
 import CardinalPointsBurst from './CardinalPointsBurst';
+import IlluminationAmmunition from './IlluminationAmmunition';
 import PolarDeviationsBurst from './PolarDeviationsBurst';
 
 const FireCorrection = ({
@@ -108,7 +110,6 @@ const FireCorrection = ({
           targetData.rangeTarget * Math.sin(angle * 6 * (Math.PI / 180)),
       );
     }
-
     const burstX = +targetX + +burstData.north - +burstData.south;
     const burstY = +targetY + +burstData.east - +burstData.west;
 
@@ -157,33 +158,62 @@ const FireCorrection = ({
             -1,
         );
       }
-
       proofreadingInAngle = (
         angleFromMainStreamСalculation - directionAlngle.toFixed(2)
       ).toFixed(2);
     }
 
     return {proofreadingInAngle, proofreadingInAim};
-  }, [burstData.north || burstData.south || burstData.east || burstData.we]);
+  }, [burstData.north, burstData.south, burstData.east, burstData.west]);
+
+  const RGM = () => {
+    if (basicData.fuseName === 0) {
+      return (
+        <>
+          <PolarDeviationsBurst
+            value={burstData}
+            setValue={setValue}
+            proofreadingInAim={proofreadingCalculationPolar.proofreadingInAim}
+            proofreadingInAngle={replaceAngle(
+              proofreadingCalculationPolar.proofreadingInAngle,
+            )}
+          />
+          <CardinalPointsBurst
+            value={burstData}
+            setValue={setValue}
+            proofreadingInAim={
+              proofreadingCalculationCardinal.proofreadingInAim
+            }
+            proofreadingInAngle={replaceAngle(
+              proofreadingCalculationCardinal.proofreadingInAngle,
+            )}
+          />
+        </>
+      );
+    }
+  };
+
+  const T7 = () => {
+    if (basicData.fuseName === 2) {
+      return (
+        <>
+          <IlluminationAmmunition
+            value={burstData}
+            setValue={setValue}
+            proofreadingInAim={proofreadingCalculationPolar.proofreadingInAim}
+            proofreadingInAngle={replaceAngle(
+              proofreadingCalculationPolar.proofreadingInAngle,
+            )}
+          />
+        </>
+      );
+    }
+  };
+
   return (
     <>
-      {/*РГМ */}
-      <PolarDeviationsBurst
-        value={burstData}
-        setValue={setValue}
-        proofreadingInAim={proofreadingCalculationPolar.proofreadingInAim}
-        proofreadingInAngle={replaceAngle(
-          proofreadingCalculationPolar.proofreadingInAngle,
-        )}
-      />
-      <CardinalPointsBurst
-        value={burstData}
-        setValue={setValue}
-        proofreadingInAim={proofreadingCalculationCardinal.proofreadingInAim}
-        proofreadingInAngle={replaceAngle(
-          proofreadingCalculationCardinal.proofreadingInAngle,
-        )}
-      />
+      <RGM />
+      <T7 />
     </>
   );
 };

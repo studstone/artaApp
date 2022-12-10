@@ -1,10 +1,8 @@
 import React, {useState} from 'react';
 import {
-  Image,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -21,7 +19,7 @@ import CoordinatsVariant from '../components/CoordinatsVariant';
 import FiringEquipmentRGM from '../components/FiringEquipmentRGM';
 
 import shotingTables from '../DB/shotingTables';
-import FireCorrection from '../components/FireCorrection';
+import FireCorrection from '../components/FireCorrection/FireCorrection';
 
 const initBasicData = {
   fuseName: null,
@@ -66,6 +64,7 @@ const initBurstData = {
   south: '',
   east: '',
   west: '',
+  heightBurst: '',
 };
 
 const BatteryCommander = () => {
@@ -196,12 +195,11 @@ const BatteryCommander = () => {
   const rangeСalculation = React.useMemo(() => {
     let topographicRange = 0;
 
-    if (
-      (targetData.coordinateTargetX !== '' &&
-        targetData.coordinateTargetY !== '') ||
-      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
-    ) {
-      if (targetData.coordinateVariant) {
+    if (targetData.coordinateVariant) {
+      if (
+        targetData.coordinateTargetX !== '' &&
+        targetData.coordinateTargetY !== ''
+      ) {
         topographicRange = Math.round(
           Math.sqrt(
             Math.pow(targetData.coordinateTargetX - FPData.coordinateFPX, 2) +
@@ -211,6 +209,10 @@ const BatteryCommander = () => {
 
         return topographicRange;
       } else {
+        return topographicRange;
+      }
+    } else {
+      if (targetData.rangeTarget !== '' && targetData.angleTarget !== '') {
         topographicRange = Math.round(
           Math.sqrt(
             Math.pow(
@@ -223,21 +225,12 @@ const BatteryCommander = () => {
               ),
           ),
         );
-
+        return topographicRange;
+      } else {
         return topographicRange;
       }
-    } else {
-      return topographicRange;
     }
-  }, [
-    targetData.coordinateTargetX,
-    targetData.coordinateTargetY,
-    FPData.coordinateFPX,
-    FPData.coordinateFPY || coordinateTargetСalculation.targetX,
-    coordinateTargetСalculation.targetY,
-    FPData.coordinateFPX,
-    FPData.coordinateFPY,
-  ]);
+  }, [targetData, FPData]);
   /*расчет исчисленной дальности*/
   const calculatedRangeСalculation = React.useMemo(() => {
     const calculatedRange = rangeСalculation + +targetData.amendmentRange;
@@ -254,11 +247,8 @@ const BatteryCommander = () => {
       let installationFuse = '';
       let time = 0;
       let Vd = 0;
-      if (
-        (targetData.coordinateTargetX !== '' &&
-          targetData.coordinateTargetY !== '') ||
-        (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
-      ) {
+
+      if (calculatedRangeСalculation !== 0) {
         if (basicData.trajectory === 0) {
           supportingRange = shotingTables
             .filter(el => el.fuse === basicData.fuseName)
@@ -363,13 +353,7 @@ const BatteryCommander = () => {
         Vd,
       };
     }
-  }, [
-    basicData.trajectory,
-    basicData.fuseName,
-    basicData.nameCharge,
-    basicData.trajectory,
-    calculatedRangeСalculation,
-  ]);
+  }, [basicData, calculatedRangeСalculation]);
   // /*расчет прицела*/
   const rangeFinalСalculation = React.useMemo(() => {
     const supportingAim = returnDataST.supportingAim;
@@ -454,37 +438,44 @@ const BatteryCommander = () => {
       angle = directionalAngle;
     }
     return angle.toFixed(2);
-  }, [
-    targetData.coordinateTargetY,
-    targetData.coordinateTargetX,
-    FPData.coordinateFPY,
-    FPData.coordinateFPX || coordinateTargetСalculation.targetY,
-    coordinateTargetСalculation.targetX,
-    FPData.coordinateFPY,
-    FPData.coordinateFPX,
-  ]);
+  }, [targetData, FPData]);
   /*расчет топографического доворота*/
   const angleFromMainStreamСalculation = React.useMemo(() => {
     let directionAlngle = 0;
 
-    if (
-      (targetData.coordinateTargetX !== '' &&
-        targetData.coordinateTargetY !== '') ||
-      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
-    ) {
-      if (angleСalculation >= 52.5 && angleСalculation <= 60) {
-        directionAlngle = angleСalculation - basicData.mainStream - 60;
+    if (targetData.coordinateVariant) {
+      if (
+        targetData.coordinateTargetX !== '' &&
+        targetData.coordinateTargetY !== ''
+      ) {
+        if (angleСalculation >= 52.5 && angleСalculation <= 60) {
+          directionAlngle = angleСalculation - basicData.mainStream - 60;
+        } else {
+          directionAlngle = angleСalculation - basicData.mainStream;
+        }
+
+        if (directionAlngle < -15) {
+          directionAlngle = directionAlngle + 60;
+        }
+        return directionAlngle.toFixed(2);
       } else {
-        directionAlngle = angleСalculation - basicData.mainStream;
+        return directionAlngle.toFixed(2);
       }
-
-      if (directionAlngle < -15) {
-        directionAlngle = directionAlngle + 60;
-      }
-
-      return directionAlngle.toFixed(2);
     } else {
-      return directionAlngle;
+      if (targetData.angleTarget !== '' && targetData.rangeTarget !== '') {
+        if (angleСalculation >= 52.5 && angleСalculation <= 60) {
+          directionAlngle = angleСalculation - basicData.mainStream - 60;
+        } else {
+          directionAlngle = angleСalculation - basicData.mainStream;
+        }
+
+        if (directionAlngle < -15) {
+          directionAlngle = directionAlngle + 60;
+        }
+        return directionAlngle.toFixed(2);
+      } else {
+        return directionAlngle.toFixed(2);
+      }
     }
   }, [basicData.mainStream, angleСalculation]);
   // /*расчет исчисленного доворота*/
@@ -508,27 +499,31 @@ const BatteryCommander = () => {
   const fanCalculation = React.useMemo(() => {
     let fan = 0;
 
-    if (targetData.frontTarget - basicData.frontFP !== 0) {
-      fan = (
-        ((targetData.frontTarget - basicData.frontFP) /
-          4 /
-          (0.001 * calculatedRangeСalculation)) *
-        0.01
-      ).toFixed(2);
-    } else {
-      return 'Iв ';
-    }
+    if (rangeСalculation !== 0) {
+      if (targetData.frontTarget - basicData.frontFP !== 0) {
+        fan = (
+          ((targetData.frontTarget - basicData.frontFP) /
+            4 /
+            (0.001 * rangeСalculation)) *
+          0.01
+        ).toFixed(2);
+      } else {
+        return 'Iв ';
+      }
 
-    if (targetData.frontTarget === '' || basicData.frontFP === '') {
-      return 'Iв ';
-    } else if (fan < 0) {
-      return `Iв соед в ${fan * -1}`;
-    } else if (fan != 0) {
-      return `Iв разд в ${fan}`;
+      if (targetData.frontTarget === '' || basicData.frontFP === '') {
+        return 'Iв ';
+      } else if (fan < 0) {
+        return `Iв соед в ${fan * -1}`;
+      } else if (fan != 0) {
+        return `Iв разд в ${fan}`;
+      } else {
+        return 'Iв ';
+      }
     } else {
       return 'Iв ';
     }
-  }, [targetData.frontTarget, basicData.frontFP, calculatedRangeСalculation]);
+  }, [targetData.frontTarget, basicData.frontFP, rangeСalculation]);
   // /*расчет скачка*/
   const jumpCalculation = React.useMemo(() => {
     const dXtis = returnDataST.dXtis;
@@ -540,29 +535,31 @@ const BatteryCommander = () => {
       jump = Math.round(targetData.depthTarget / 3 / dXtis);
     }
 
-    return `Ск: ${jump}`;
+    return jump;
   }, [returnDataST.dXtis, targetData.depthTarget]);
   // /*расчет интервала веера на орудие*/
   const intervalFanCalculation = React.useMemo(() => {
-    const intervalFan = Math.round(
-      (targetData.frontTarget - basicData.frontFP) / 4,
-    );
+    let intervalFan = 0;
 
-    if (intervalFan < 0) {
-      return `Iв.ор 0`;
+    if (rangeСalculation !== 0) {
+      intervalFan = Math.round(
+        (targetData.frontTarget - basicData.frontFP) / 4,
+      );
+
+      if (intervalFan < 0) {
+        return `Iв.ор 0`;
+      } else {
+        return `Iв.ор ${intervalFan}`;
+      }
     } else {
-      return `Iв.ор ${intervalFan}`;
+      return `Iв.ор 0`;
     }
-  }, [targetData.frontTarget, basicData.frontFP]);
+  }, [targetData, basicData]);
   // /*расчет дальности командира*/
   const rangeCommanderCalculation = React.useMemo(() => {
     let topographicRange = 0;
 
-    if (
-      (targetData.coordinateTargetX !== '' &&
-        targetData.coordinateTargetY !== '') ||
-      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
-    ) {
+    if (rangeСalculation !== 0) {
       if (targetData.coordinateVariant) {
         topographicRange = Math.round(
           Math.sqrt(
@@ -578,22 +575,13 @@ const BatteryCommander = () => {
     } else {
       return topographicRange;
     }
-  }, [
-    targetData.coordinateTargetX,
-    targetData.coordinateTargetY,
-    OPData.coordinateOPX,
-    OPData.coordinateOPY || targetData.rangeTarget,
-  ]);
+  }, [targetData, OPData]);
   // /*расчет угла командира*/
   const angleCommanderCalculation = React.useMemo(() => {
     let directionalAngle = 0;
     let angle = 0;
 
-    if (
-      (targetData.coordinateTargetX !== '' &&
-        targetData.coordinateTargetY !== '') ||
-      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
-    ) {
+    if (rangeСalculation !== 0) {
       if (targetData.coordinateVariant) {
         directionalAngle =
           (Math.atan2(
@@ -617,22 +605,13 @@ const BatteryCommander = () => {
     } else {
       return angle;
     }
-  }, [
-    targetData.coordinateTargetY,
-    OPData.coordinateOPY,
-    targetData.coordinateTargetX,
-    OPData.coordinateOPX || targetData.angleTarget,
-  ]);
+  }, [targetData, OPData]);
   // /*расчет ПС*/
   const amendmentDisplacementCalculation = React.useMemo(() => {
     const numberAngle = +angleСalculation;
     const numberAngleCommander = +angleCommanderCalculation;
     let amendmentDisplacement = 0;
-    if (
-      (targetData.coordinateTargetX !== '' &&
-        targetData.coordinateTargetY !== '') ||
-      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
-    ) {
+    if (rangeСalculation !== 0) {
       if (numberAngle - numberAngleCommander < 0) {
         amendmentDisplacement = (numberAngle - numberAngleCommander) * -1;
       } else {

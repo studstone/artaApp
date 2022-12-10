@@ -1,28 +1,30 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
-import Input from './Input';
+import Input from '../Input';
 
 const inputs = {
-  north: {
-    placeholder: 'Север',
-    text: 'С:',
+  rangeBurst: {
+    placeholder: 'Дальн. разрыва',
+    text: 'Др:',
+    keyboardType: 'numeric',
+    maxLength: 4,
   },
-  south: {
-    placeholder: 'ЮГ',
-    text: 'Ю:',
+  angleBurst: {
+    placeholder: 'Угол разрыва',
+    text: 'УГр:',
+    keyboardType: 'numbers-and-punctuation',
+    maxLength: 5,
   },
-  west: {
-    placeholder: 'Запад',
-    text: 'З:',
-  },
-  east: {
-    placeholder: 'Восток',
-    text: 'В:',
+  heightBurst: {
+    placeholder: 'M разрыва',
+    text: 'УГр:',
+    keyboardType: 'numbers-and-punctuation',
+    maxLength: 5,
   },
 };
 
-export default React.memo(function CardinalPointsBurst({
+export default React.memo(function PolarDeviationsBurst({
   value,
   setValue,
   proofreadingInAim,
@@ -30,7 +32,7 @@ export default React.memo(function CardinalPointsBurst({
 }) {
   return (
     <>
-      <Text style={styles.textHeader}>Расчет корректур (ПКСС)</Text>
+      <Text style={styles.textHeader}>Расчет корректур</Text>
       <View style={styles.wrapper}>
         {Object.entries(inputs).map(([key, item]) => (
           <Input
@@ -40,14 +42,15 @@ export default React.memo(function CardinalPointsBurst({
             setState={value => setValue(key, value)}
             placeholder={item.placeholder}
             placeholderTextColor={'black'}
-            maxLength={3}
+            maxLength={item.maxLength}
             text={item.text}
             style={styles.inputWrapper}
           />
         ))}
       </View>
       <View style={styles.answerWrapper}>
-        <Text style={styles.textAnswer}>{`ΔП: ${proofreadingInAim}`}</Text>
+        <Text style={styles.textAnswer}>{`ΔПр: ${proofreadingInAim}`}</Text>
+        <Text style={styles.textAnswer}>{`Δδ: ${proofreadingInAngle}`}</Text>
         <Text style={styles.textAnswer}>{`Δδ: ${proofreadingInAngle}`}</Text>
       </View>
     </>
@@ -86,7 +89,7 @@ const styles = StyleSheet.create({
   },
   textAnswer: {
     color: '#750000',
-    fontSize: 40,
-    width: '50%',
+    // fontSize: 40,
+    // width: '50%',
   },
 });

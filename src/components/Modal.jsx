@@ -111,7 +111,7 @@ export default React.memo(function ModalBlock({
 
       return dVoCharge;
     }
-  }, [basicData.nameCharge, meteoData.chargeTemperature]);
+  }, [basicData, meteoData]);
   /** рассчитываем dV0 суммарное */
   const totalDeviationInitialSpeedCalculation = () => {
     const totalDeviationInitialSpeed =
@@ -449,11 +449,7 @@ export default React.memo(function ModalBlock({
     let totalAmendmentInRange = 0;
     let totalAmendmentInDirection = 0;
 
-    if (
-      (targetData.coordinateTargetX !== '' &&
-        targetData.coordinateTargetY !== '') ||
-      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
-    ) {
+    if (rangeСalculation !== 0) {
       if (
         meteoData.airTemperature !== '' &&
         meteoData.chargeTemperature !== '' &&
@@ -484,11 +480,7 @@ export default React.memo(function ModalBlock({
   }, [meteoData]);
 
   const test = () => {
-    if (
-      (targetData.coordinateTargetX !== '' &&
-        targetData.coordinateTargetY !== '') ||
-      (targetData.rangeTarget !== '' && targetData.angleTarget !== '')
-    ) {
+    if (rangeСalculation !== 0) {
       changeTargetData(
         'amendmentRange',
         totalAmendmentsCalculation.totalAmendmentInRange,

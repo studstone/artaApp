@@ -25,7 +25,7 @@ const FiringEquipmentRGM = ({
       text: `У.вз: ${choosingFuseInstallation}`,
     },
     {
-      text: jumpCalculation,
+      text: jumpCalculation === Infinity ? 'Ск: 0' : `Ск: ${jumpCalculation}`,
     },
     {
       text: `δт: ${replaceAngle(angleFromMainStreamСalculation)}`,
