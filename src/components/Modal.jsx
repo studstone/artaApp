@@ -443,7 +443,7 @@ export default React.memo(function ModalBlock({
     }
   };
   /**расчитываем суммарные поправки */
-  const totalAmendmentsCalculation = () => {
+  const totalAmendmentsCalculation = React.useMemo(() => {
     let totalAmendmentInRange = 0;
     let totalAmendmentInDirection = 0;
 
@@ -472,7 +472,7 @@ export default React.memo(function ModalBlock({
     } else {
       return {totalAmendmentInRange, totalAmendmentInDirection};
     }
-  };
+  }, [meteoData]);
   /*преобразовать точку в пробел */
   const replaceAngle = angle => {
     const reg = /\./;
@@ -494,11 +494,11 @@ export default React.memo(function ModalBlock({
     ) {
       changeTargetData(
         'amendmentRange',
-        totalAmendmentsCalculation().totalAmendmentInRange,
+        totalAmendmentsCalculation.totalAmendmentInRange,
       );
       changeTargetData(
         'amendmentAngle',
-        totalAmendmentsCalculation().totalAmendmentInDirection,
+        totalAmendmentsCalculation.totalAmendmentInDirection,
       );
     }
   };
@@ -527,7 +527,7 @@ export default React.memo(function ModalBlock({
                     fontSize: 18,
                     marginRight: 15,
                   }}>
-                  {`ΔД: ${totalAmendmentsCalculation().totalAmendmentInRange}`}
+                  {`ΔД: ${totalAmendmentsCalculation.totalAmendmentInRange}`}
                 </Text>
                 <Text
                   style={{
@@ -535,7 +535,7 @@ export default React.memo(function ModalBlock({
                     fontSize: 18,
                   }}>
                   {`Δδ: ${replaceAngle(
-                    totalAmendmentsCalculation().totalAmendmentInDirection,
+                    totalAmendmentsCalculation.totalAmendmentInDirection,
                   )}`}
                 </Text>
               </View>

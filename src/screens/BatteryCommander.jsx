@@ -18,7 +18,7 @@ import FirePosition from '../components/FirePosition';
 import DescriptionTarget from '../components/DescriptionTarget';
 import TargetsList from '../components/TargetsList';
 import CoordinatsVariant from '../components/CoordinatsVariant';
-import FiringEquipment from '../components/FiringEquipment';
+import FiringEquipmentRGM from '../components/FiringEquipmentRGM';
 import PolarDeviationsBurst from '../components/PolarDeviationsBurst';
 import CardinalPointsBurst from '../components/CardinalPointsBurst';
 
@@ -863,7 +863,7 @@ const BatteryCommander = () => {
               </Text>
             </TouchableOpacity>
             {/* Установки */}
-            <FiringEquipment
+            <FiringEquipmentRGM
               rangeСalculation={rangeСalculation}
               replaceAngle={replaceAngle}
               angleFromMainStreamСalculation={angleFromMainStreamСalculation}
