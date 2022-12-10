@@ -1,7 +1,7 @@
 import React from 'react';
 import {Switch, Text, View} from 'react-native';
 
-const SwitchBlock = ({value, setValue}) => {
+const SwitchBlock = ({value, setValue, textTrue, textFalse}) => {
   return (
     <View
       style={{
@@ -10,7 +10,7 @@ const SwitchBlock = ({value, setValue}) => {
         flexDirection: 'row',
         justifyContent: 'center',
       }}>
-      <Text style={{fontSize: 18}}>Полярные</Text>
+      <Text style={{fontSize: 18}}>{textTrue}</Text>
       <Switch
         style={{marginLeft: 10, marginRight: 10}}
         trackColor={{false: '#5c00b8', true: '#81b0ff'}}
@@ -18,7 +18,7 @@ const SwitchBlock = ({value, setValue}) => {
         onValueChange={setValue}
         value={value}
       />
-      <Text style={{fontSize: 18}}>Прямоугольные</Text>
+      <Text style={{fontSize: 18}}>{textFalse}</Text>
     </View>
   );
 };

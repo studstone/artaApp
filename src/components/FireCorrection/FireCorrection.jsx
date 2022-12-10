@@ -166,9 +166,9 @@ const FireCorrection = ({
     return {proofreadingInAngle, proofreadingInAim};
   }, [burstData.north, burstData.south, burstData.east, burstData.west]);
 
-  const RGM = () => {
-    if (basicData.fuseName === 0) {
-      return (
+  return (
+    <>
+      {basicData.fuseName === 0 && (
         <>
           <PolarDeviationsBurst
             value={burstData}
@@ -189,13 +189,8 @@ const FireCorrection = ({
             )}
           />
         </>
-      );
-    }
-  };
-
-  const T7 = () => {
-    if (basicData.fuseName === 2) {
-      return (
+      )}
+      {basicData.fuseName === 2 && (
         <>
           <IlluminationAmmunition
             value={burstData}
@@ -206,14 +201,7 @@ const FireCorrection = ({
             )}
           />
         </>
-      );
-    }
-  };
-
-  return (
-    <>
-      <RGM />
-      <T7 />
+      )}
     </>
   );
 };

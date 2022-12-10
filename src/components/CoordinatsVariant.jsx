@@ -10,6 +10,8 @@ export default React.memo(function CoordinatsVariant({value, setValue}) {
       <SwitchBlock
         value={value.coordinateVariant}
         setValue={value => setValue('coordinateVariant', value)}
+        textTrue="Полярные"
+        textFalse="Прямоугольнные"
       />
       {/* Цель */}
       {value.coordinateVariant ? (

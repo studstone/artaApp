@@ -2,6 +2,7 @@ import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
 import Input from '../Input';
+import SwitchBlock from '../SwitchBlock';
 
 const inputs = {
   rangeBurst: {
@@ -13,13 +14,22 @@ const inputs = {
   angleBurst: {
     placeholder: 'Угол разрыва',
     text: 'УГр:',
-    keyboardType: 'numbers-and-punctuation',
+    keyboardType: 'numeric',
     maxLength: 5,
   },
   heightBurst: {
-    placeholder: 'M разрыва',
-    text: 'УГр:',
-    keyboardType: 'numbers-and-punctuation',
+    placeholder: 'Уг.разр над ц',
+    text: 'ΔМр:',
+    keyboardType: 'numeric',
+    maxLength: 5,
+  },
+};
+
+const inputs1 = {
+  burningTime: {
+    placeholder: 'Время горения',
+    text: 'Т гор:',
+    keyboardType: 'numeric',
     maxLength: 5,
   },
 };
@@ -30,28 +40,56 @@ export default React.memo(function PolarDeviationsBurst({
   proofreadingInAim,
   proofreadingInAngle,
 }) {
+  const [isVisible, setIsVisible] = React.useState(true);
+
   return (
     <>
       <Text style={styles.textHeader}>Расчет корректур</Text>
+      <SwitchBlock
+        value={isVisible}
+        setValue={setIsVisible}
+        textTrue="На земле"
+        textFalse="В воздухе"
+      />
       <View style={styles.wrapper}>
-        {Object.entries(inputs).map(([key, item]) => (
-          <Input
-            key={key}
-            state={value[key]}
-            keyboardType={'numeric'}
-            setState={value => setValue(key, value)}
-            placeholder={item.placeholder}
-            placeholderTextColor={'black'}
-            maxLength={item.maxLength}
-            text={item.text}
-            style={styles.inputWrapper}
-          />
-        ))}
+        {isVisible ? (
+          <>
+            {Object.entries(inputs).map(([key, item]) => (
+              <Input
+                key={key}
+                state={value[key]}
+                keyboardType={'numeric'}
+                setState={value => setValue(key, value)}
+                placeholder={item.placeholder}
+                placeholderTextColor={'black'}
+                maxLength={item.maxLength}
+                text={item.text}
+                style={styles.inputWrapper}
+              />
+            ))}
+          </>
+        ) : (
+          <>
+            {Object.entries(inputs1).map(([key, item]) => (
+              <Input
+                key={key}
+                state={value[key]}
+                keyboardType={'numeric'}
+                setState={value => setValue(key, value)}
+                placeholder={item.placeholder}
+                placeholderTextColor={'black'}
+                maxLength={item.maxLength}
+                text={item.text}
+                style={styles.inputWrapper}
+              />
+            ))}
+          </>
+        )}
       </View>
       <View style={styles.answerWrapper}>
         <Text style={styles.textAnswer}>{`ΔПр: ${proofreadingInAim}`}</Text>
         <Text style={styles.textAnswer}>{`Δδ: ${proofreadingInAngle}`}</Text>
-        <Text style={styles.textAnswer}>{`Δδ: ${proofreadingInAngle}`}</Text>
+        <Text style={styles.textAnswer}>{`ΔУр: ${proofreadingInAngle}`}</Text>
       </View>
     </>
   );
@@ -89,7 +127,7 @@ const styles = StyleSheet.create({
   },
   textAnswer: {
     color: '#750000',
-    // fontSize: 40,
-    // width: '50%',
+    fontSize: 25,
+    width: '33%',
   },
 });
