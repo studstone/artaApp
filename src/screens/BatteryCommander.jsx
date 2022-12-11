@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -13,13 +13,14 @@ import ModalBlock from '../components/Modal';
 import BasicData from '../components/BasicData';
 import ObservationPost from '../components/ObservationPost';
 import FirePosition from '../components/FirePosition';
-import DescriptionTarget from '../components/DescriptionTarget';
 import TargetsList from '../components/TargetsList';
-import CoordinatsVariant from '../components/CoordinatsVariant';
-import FiringEquipmentRGM from '../components/FiringEquipmentRGM';
+import CoordinatsVariant from '../components/Targets/CoordinatsVariant';
+import DescriptionTarget from '../components/DescriptionTarget/DescriptionTarget';
+import FireCorrection from '../components/FireCorrection/FireCorrection';
 
 import shotingTables from '../DB/shotingTables';
-import FireCorrection from '../components/FireCorrection/FireCorrection';
+import DataCalcAdjustments from '../components/DataCalculatingAdjustments/DataCalcAdjustments';
+import FiringEquipment from '../components/FiringEqipment/FiringEquipment';
 
 const initBasicData = {
   fuseName: null,
@@ -707,6 +708,48 @@ const BatteryCommander = () => {
     setTargets([]);
     setTargetData({...initTargetData});
   };
+  const objFunctionDCARGM = {
+    amendmentDisplacementCalculation,
+    removalCoefficientCalculation,
+    stepAngomerCalculation,
+    findOutThePositionOfTheFirePosition,
+    rangeCommanderCalculation,
+    angleCommanderCalculation,
+    returnDataST,
+    vdInAim,
+    replaceAngle,
+    basicData,
+  };
+  const objFunctionFERGM = {
+    rangeСalculation,
+    replaceAngle,
+    angleFromMainStreamСalculation,
+    targetData,
+    returnDataST,
+    calculatedRangeСalculation,
+    choosingFuseInstallation,
+    rangeFinalСalculation,
+    excessСalculation,
+    calculatedAngleFromMainStreamСalculation,
+    jumpCalculation,
+    fanCalculation,
+    intervalFanCalculation,
+    basicData,
+  };
+  const objFunctionFC = {
+    FPData,
+    OPData,
+    burstData,
+    targetData,
+    basicData,
+    rangeСalculation,
+    changeBurstData,
+    replaceAngle,
+    returnDataST,
+    angleFromMainStreamСalculation,
+    removalCoefficientCalculation,
+    rangeCommanderCalculation,
+  };
   return (
     <>
       {!isLoading && (
@@ -746,151 +789,11 @@ const BatteryCommander = () => {
               </Text>
             </TouchableOpacity>
             {/* Установки */}
-            <FiringEquipmentRGM
-              rangeСalculation={rangeСalculation}
-              replaceAngle={replaceAngle}
-              angleFromMainStreamСalculation={angleFromMainStreamСalculation}
-              amendmentRange={targetData.amendmentRange}
-              amendmentAngle={targetData.amendmentAngle}
-              calculatedRangeСalculation={calculatedRangeСalculation}
-              choosingFuseInstallation={choosingFuseInstallation}
-              rangeFinalСalculation={rangeFinalСalculation}
-              excessСalculation={excessСalculation}
-              calculatedAngleFromMainStreamСalculation={
-                calculatedAngleFromMainStreamСalculation
-              }
-              jumpCalculation={jumpCalculation}
-              fanCalculation={fanCalculation}
-              intervalFanCalculation={intervalFanCalculation}
-              time={returnDataST.time}
-            />
+            <FiringEquipment {...objFunctionFERGM} />
             {/* Данные для расчета корректур */}
-            <Text
-              style={{
-                textAlign: 'center',
-                fontSize: 30,
-                color: '#000a96',
-                marginBottom: 15,
-              }}>
-              Данные для расчета корректур
-            </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                marginBottom: 15,
-              }}>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#750000',
-                  width: '25%',
-                  marginBottom: 15,
-                }}>
-                {`ПС: ${replaceAngle(amendmentDisplacementCalculation)}`}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#750000',
-                  width: '25%',
-                  marginBottom: 15,
-                }}>
-                {`Ку: ${removalCoefficientCalculation}`}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#750000',
-                  width: '25%',
-                  marginBottom: 15,
-                }}>
-                {`Шу: ${stepAngomerCalculation}`}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#750000',
-                  width: '25%',
-                  marginBottom: 15,
-                }}>
-                {`ОП: ${findOutThePositionOfTheFirePosition}`}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#750000',
-                  width: '25%',
-                  marginBottom: 15,
-                }}>
-                {`Дк ${rangeCommanderCalculation}`}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#750000',
-                  width: '25%',
-                  marginBottom: 15,
-                }}>
-                {`Угк ${replaceAngle(angleCommanderCalculation)}`}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#750000',
-                  width: '25%',
-                  marginBottom: 15,
-                }}>
-                {`Вд: ${returnDataST.Vd}`}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#750000',
-                  width: '25%',
-                  marginBottom: 15,
-                }}>
-                {`ΔХтыс: ${returnDataST.dXtis}`}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#750000',
-                }}>
-                {`8Вд: ΔП=${vdInAim(8)}`}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#750000',
-                }}>
-                {`4Вд: ΔП=${vdInAim(4)}`}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#750000',
-                }}>
-                {`2Вд: ΔП=${vdInAim(2)}`}
-              </Text>
-            </View>
+            <DataCalcAdjustments {...objFunctionDCARGM} />
             {/* Рассчет коррекур */}
-            <FireCorrection
-              FPData={FPData}
-              OPData={OPData}
-              burstData={burstData}
-              basicData={basicData}
-              targetData={targetData}
-              rangeСalculation={rangeСalculation}
-              setValue={changeBurstData}
-              replaceAngle={replaceAngle}
-              returnDataST={returnDataST}
-              angleFromMainStreamСalculation={angleFromMainStreamСalculation}
-              removalCoefficientCalculation={removalCoefficientCalculation}
-              rangeCommanderCalculation={rangeCommanderCalculation}
-            />
+            <FireCorrection {...objFunctionFC} />
           </View>
         </ScrollView>
       )}
@@ -899,28 +802,6 @@ const BatteryCommander = () => {
 };
 
 const styles = StyleSheet.create({
-  wrapper: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  container: {
-    position: 'relative',
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingRight: 2,
-    paddingLeft: 2,
-    marginTop: 12,
-    width: '49%',
-    height: 45,
-    borderColor: 'black',
-    borderWidth: 1,
-    borderStyle: 'solid',
-  },
   buttonStop: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -931,44 +812,6 @@ const styles = StyleSheet.create({
     height: 45,
     backgroundColor: '#680202',
     borderRadius: 5,
-  },
-  input: {
-    maxWidth: '100%',
-    minWidth: 0,
-    fontSize: 18,
-    flex: 1,
-    borderWidth: 1,
-    padding: 2,
-    borderColor: 'transparent',
-    color: '#2e2e2e',
-  },
-  button: {
-    width: 40,
-    height: 40,
-  },
-  image: {
-    width: 40,
-    height: 40,
-  },
-  label: {
-    fontSize: 18,
-  },
-  answerWrapper: {
-    marginTop: 15,
-    flexDirection: 'row',
-  },
-  buttonСalculation: {
-    marginTop: 15,
-    backgroundColor: '#613627',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 10,
-    paddingBottom: 10,
-    borderRadius: 20,
-  },
-  textСalculation: {
-    fontSize: 20,
-    color: '#3f0d1e',
   },
 });
 

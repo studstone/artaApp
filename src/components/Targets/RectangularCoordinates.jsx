@@ -1,7 +1,7 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 
-import Input from './Input';
+import Input from '../Input';
 
 const inputs = {
   coordinateTargetX: {

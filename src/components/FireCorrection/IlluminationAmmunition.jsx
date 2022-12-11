@@ -46,26 +46,26 @@ const inputs1 = {
   },
 };
 
-export default React.memo(function IlluminationAmmunition({
-  value,
-  setValue,
-  proofreadingInAngle,
-  removalCoefficientCalculation,
-  rangeCommanderCalculation,
-  rangeСalculation,
-  returnDataST,
-  replaceAngle,
-}) {
+export default React.memo(function IlluminationAmmunition(props) {
   const [isVisible, setIsVisible] = React.useState(true);
+
+  const value = props.burstData;
+  const setValue = props.changeBurstData;
+  const OPData = props.OPData;
+  const FPData = props.FPData;
+  const basicData = props.basicData;
+  const rangeCommander = props.rangeCommanderCalculation;
+  const removalCoefficien = +props.removalCoefficientCalculation;
+  const dXtis = props.returnDataST.dXtis;
+  const replaceAngle = props.replaceAngle;
+  const returnDataST = props.returnDataST;
+  const angleFromMainStreamСalculation = props.angleFromMainStreamСalculation;
 
   /**расчет поправок*/
   const proofreadingCalculationIllumination = () => {
     const heightBurst = +value.heightBurst;
     const rangeBurst = +value.rangeBurst;
-    const removalCoefficien = +removalCoefficientCalculation;
-    const rangeCommander = rangeCommanderCalculation;
     const burningTime = +value.burningTime;
-    const dXtis = returnDataST.dXtis;
 
     let amendmentExcess = 0;
     let amendmentRange = 400 / dXtis;
@@ -113,6 +113,65 @@ export default React.memo(function IlluminationAmmunition({
 
     return {amendmentExcess, amendmentRange};
   };
+  const proofreadingCalculationPolar = React.useMemo(() => {
+    let proofreadingInAim = 0;
+    let proofreadingInAngle = 0;
+    const coordinateX = +OPData.coordinateOPX;
+    const coordinateY = +OPData.coordinateOPY;
+    const angle = +value.angleBurst;
+
+    const burstX = Math.round(
+      coordinateX + value.rangeBurst * Math.cos(angle * 6 * (Math.PI / 180)),
+    );
+    const burstY = Math.round(
+      coordinateY + value.rangeBurst * Math.sin(angle * 6 * (Math.PI / 180)),
+    );
+    const topographicRangeBurst = Math.round(
+      Math.sqrt(
+        Math.pow(burstX - FPData.coordinateFPX, 2) +
+          Math.pow(burstY - FPData.coordinateFPY, 2),
+      ),
+    );
+    const directionalAngle =
+      (Math.atan2(
+        burstY - FPData.coordinateFPY,
+        burstX - FPData.coordinateFPX,
+      ) *
+        180) /
+      Math.PI /
+      6;
+    let angleFPInBurst = 0;
+    let directionAlngle = 0;
+    if (directionalAngle < 0) {
+      angleFPInBurst = directionalAngle + 60;
+    } else {
+      angleFPInBurst = directionalAngle;
+    }
+    if (angleFPInBurst >= 52.5 && angleFPInBurst <= 60) {
+      directionAlngle = angleFPInBurst - basicData.mainStream - 60;
+    } else {
+      directionAlngle = angleFPInBurst - basicData.mainStream;
+    }
+    if (value.rangeBurst === '' || value.angleBurst === '') {
+      proofreadingInAngle = 0;
+      proofreadingInAim = 0;
+    } else {
+      if (basicData.trajectory === 0) {
+        proofreadingInAim = Math.round(
+          (rangeСalculation - topographicRangeBurst) / returnDataST.dXtis,
+        );
+      } else {
+        proofreadingInAim = Math.round(
+          ((rangeСalculation - topographicRangeBurst) / returnDataST.dXtis) *
+            -1,
+        );
+      }
+      proofreadingInAngle = (
+        angleFromMainStreamСalculation - directionAlngle
+      ).toFixed(2);
+    }
+    return proofreadingInAngle;
+  }, [value]);
 
   return (
     <>
@@ -163,7 +222,7 @@ export default React.memo(function IlluminationAmmunition({
           proofreadingCalculationIllumination().amendmentRange
         }`}</Text>
         <Text style={styles.textAnswer}>{`Δδ: ${replaceAngle(
-          proofreadingInAngle,
+          proofreadingCalculationPolar,
         )}`}</Text>
         <Text style={styles.textAnswer}>{`ΔУр: ${replaceAngle(
           proofreadingCalculationIllumination().amendmentExcess,

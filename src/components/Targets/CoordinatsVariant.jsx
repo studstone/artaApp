@@ -2,7 +2,7 @@ import React from 'react';
 
 import PolarCoordinates from './PolarCoordinates';
 import RectangularCoordinates from './RectangularCoordinates';
-import SwitchBlock from './SwitchBlock';
+import SwitchBlock from '../SwitchBlock';
 
 export default React.memo(function CoordinatsVariant({value, setValue}) {
   return (

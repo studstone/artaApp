@@ -1,22 +1,23 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
-const FiringEquipmentRGM = ({
-  rangeСalculation,
-  replaceAngle,
-  angleFromMainStreamСalculation,
-  amendmentRange,
-  amendmentAngle,
-  calculatedRangeСalculation,
-  choosingFuseInstallation,
-  rangeFinalСalculation,
-  excessСalculation,
-  calculatedAngleFromMainStreamСalculation,
-  jumpCalculation,
-  fanCalculation,
-  intervalFanCalculation,
-  time,
-}) => {
+const FiringEquipmentRGM = props => {
+  const rangeСalculation = props.rangeСalculation;
+  const replaceAngle = props.replaceAngle;
+  const angleFromMainStreamСalculation = +props.angleFromMainStreamСalculation;
+  const amendmentRange = +props.targetData.amendmentRange;
+  const amendmentAngle = +props.targetData.amendmentAngle;
+  const calculatedRangeСalculation = props.calculatedRangeСalculation;
+  const choosingFuseInstallation = props.choosingFuseInstallation;
+  const rangeFinalСalculation = props.rangeFinalСalculation;
+  const excessСalculation = +props.excessСalculation;
+  const calculatedAngleFromMainStreamСalculation =
+    +props.calculatedAngleFromMainStreamСalculation;
+  const jumpCalculation = props.jumpCalculation;
+  const fanCalculation = +props.fanCalculation;
+  const intervalFanCalculation = props.intervalFanCalculation;
+  const time = props.returnDataST.time;
+
   const items = [
     {
       text: `Дт: ${rangeСalculation}`,
