@@ -132,11 +132,13 @@ export default React.memo(function ModalBlock({
 
       if (basicData.trajectory === 0) {
         highEntranceInBulletin = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= rangeСalculation).Yb;
       } else {
         highEntranceInBulletin = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= rangeСalculation).Yb;
@@ -256,51 +258,63 @@ export default React.memo(function ModalBlock({
 
       if (basicData.trajectory === 0) {
         z = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= rangeСalculation).Z;
         dZw = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= rangeСalculation).dZw;
         dXw = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= rangeСalculation).dXw;
         dXh = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= rangeСalculation).dXh;
         dXt = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= rangeСalculation).dXt;
         dXv0 = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= rangeСalculation).dXv0;
       } else {
         z = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= rangeСalculation).Z;
         dZw = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= rangeСalculation).dZw;
         dXw = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= rangeСalculation).dXw;
         dXh = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= rangeСalculation).dXh;
         dXt = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= rangeСalculation).dXt;
         dXv0 = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= rangeСalculation).dXv0;
@@ -448,7 +462,6 @@ export default React.memo(function ModalBlock({
   const totalAmendmentsCalculation = React.useMemo(() => {
     let totalAmendmentInRange = 0;
     let totalAmendmentInDirection = 0;
-
     if (rangeСalculation !== 0) {
       if (
         meteoData.airTemperature !== '' &&
@@ -477,8 +490,7 @@ export default React.memo(function ModalBlock({
     } else {
       return {totalAmendmentInRange, totalAmendmentInDirection};
     }
-  }, [meteoData]);
-
+  }, [meteoData, basicData]);
   const test = () => {
     if (rangeСalculation !== 0) {
       changeTargetData(

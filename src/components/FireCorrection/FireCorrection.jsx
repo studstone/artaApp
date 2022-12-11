@@ -16,6 +16,8 @@ const FireCorrection = ({
   rangeСalculation,
   returnDataST,
   angleFromMainStreamСalculation,
+  removalCoefficientCalculation,
+  rangeCommanderCalculation,
 }) => {
   // /*рассчет корректуры по Дк и УГк*/
   const proofreadingCalculationPolar = React.useMemo(() => {
@@ -195,10 +197,14 @@ const FireCorrection = ({
           <IlluminationAmmunition
             value={burstData}
             setValue={setValue}
-            proofreadingInAim={proofreadingCalculationPolar.proofreadingInAim}
-            proofreadingInAngle={replaceAngle(
-              proofreadingCalculationPolar.proofreadingInAngle,
-            )}
+            proofreadingInAngle={
+              proofreadingCalculationPolar.proofreadingInAngle
+            }
+            removalCoefficientCalculation={removalCoefficientCalculation}
+            rangeCommanderCalculation={rangeCommanderCalculation}
+            rangeСalculation={rangeСalculation}
+            returnDataST={returnDataST}
+            replaceAngle={replaceAngle}
           />
         </>
       )}

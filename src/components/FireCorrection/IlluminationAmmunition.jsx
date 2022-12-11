@@ -26,6 +26,18 @@ const inputs = {
 };
 
 const inputs1 = {
+  rangeBurst: {
+    placeholder: 'Дальн. разрыва',
+    text: 'Др:',
+    keyboardType: 'numeric',
+    maxLength: 4,
+  },
+  angleBurst: {
+    placeholder: 'Угол разрыва',
+    text: 'УГр:',
+    keyboardType: 'numeric',
+    maxLength: 5,
+  },
   burningTime: {
     placeholder: 'Время горения',
     text: 'Т гор:',
@@ -34,13 +46,73 @@ const inputs1 = {
   },
 };
 
-export default React.memo(function PolarDeviationsBurst({
+export default React.memo(function IlluminationAmmunition({
   value,
   setValue,
-  proofreadingInAim,
   proofreadingInAngle,
+  removalCoefficientCalculation,
+  rangeCommanderCalculation,
+  rangeСalculation,
+  returnDataST,
+  replaceAngle,
 }) {
   const [isVisible, setIsVisible] = React.useState(true);
+
+  /**расчет поправок*/
+  const proofreadingCalculationIllumination = () => {
+    const heightBurst = +value.heightBurst;
+    const rangeBurst = +value.rangeBurst;
+    const removalCoefficien = +removalCoefficientCalculation;
+    const rangeCommander = rangeCommanderCalculation;
+    const burningTime = +value.burningTime;
+    const dXtis = returnDataST.dXtis;
+
+    let amendmentExcess = 0;
+    let amendmentRange = 400 / dXtis;
+
+    const advantageousVerticalAngle = 50 / (0.001 * rangeCommander);
+
+    if (isVisible) {
+      amendmentExcess = (
+        (advantageousVerticalAngle - heightBurst) *
+        removalCoefficien *
+        0.01
+      ).toFixed(2);
+    } else {
+      amendmentExcess = (
+        ((burningTime * 10 + 50) / (0.001 * rangeСalculation)) *
+        0.01
+      ).toFixed(2);
+    }
+
+    if (rangeBurst > rangeCommander) {
+      amendmentRange = amendmentRange;
+    } else {
+      amendmentRange = -amendmentRange;
+    }
+
+    if (rangeBurst === 0) {
+      amendmentRange = 0;
+    } else {
+      amendmentRange = amendmentRange;
+    }
+
+    if (isVisible) {
+      if (heightBurst === 0) {
+        amendmentExcess = 0;
+      } else {
+        amendmentExcess = amendmentExcess;
+      }
+    } else {
+      if (burningTime === 0) {
+        amendmentExcess = 0;
+      } else {
+        amendmentExcess = amendmentExcess;
+      }
+    }
+
+    return {amendmentExcess, amendmentRange};
+  };
 
   return (
     <>
@@ -87,9 +159,15 @@ export default React.memo(function PolarDeviationsBurst({
         )}
       </View>
       <View style={styles.answerWrapper}>
-        <Text style={styles.textAnswer}>{`ΔПр: ${proofreadingInAim}`}</Text>
-        <Text style={styles.textAnswer}>{`Δδ: ${proofreadingInAngle}`}</Text>
-        <Text style={styles.textAnswer}>{`ΔУр: ${proofreadingInAngle}`}</Text>
+        <Text style={styles.textAnswer}>{`ΔПр: ${
+          proofreadingCalculationIllumination().amendmentRange
+        }`}</Text>
+        <Text style={styles.textAnswer}>{`Δδ: ${replaceAngle(
+          proofreadingInAngle,
+        )}`}</Text>
+        <Text style={styles.textAnswer}>{`ΔУр: ${replaceAngle(
+          proofreadingCalculationIllumination().amendmentExcess,
+        )}`}</Text>
       </View>
     </>
   );

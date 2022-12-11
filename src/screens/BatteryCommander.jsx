@@ -543,9 +543,7 @@ const BatteryCommander = () => {
     let intervalFan = 0;
 
     if (rangeСalculation !== 0) {
-      intervalFan = Math.round(
-        (targetData.frontTarget - basicData.frontFP) / 4,
-      );
+      intervalFan = Math.round(targetData.frontTarget / 4);
 
       if (intervalFan < 0) {
         return `Iв.ор 0`;
@@ -555,7 +553,7 @@ const BatteryCommander = () => {
     } else {
       return `Iв.ор 0`;
     }
-  }, [targetData, basicData]);
+  }, [targetData]);
   // /*расчет дальности командира*/
   const rangeCommanderCalculation = React.useMemo(() => {
     let topographicRange = 0;
@@ -890,6 +888,8 @@ const BatteryCommander = () => {
               replaceAngle={replaceAngle}
               returnDataST={returnDataST}
               angleFromMainStreamСalculation={angleFromMainStreamСalculation}
+              removalCoefficientCalculation={removalCoefficientCalculation}
+              rangeCommanderCalculation={rangeCommanderCalculation}
             />
           </View>
         </ScrollView>
