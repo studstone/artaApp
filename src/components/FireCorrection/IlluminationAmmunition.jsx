@@ -60,11 +60,11 @@ export default React.memo(function IlluminationAmmunition(props) {
   const replaceAngle = props.replaceAngle;
   const returnDataST = props.returnDataST;
   const angleFromMainStreamСalculation = props.angleFromMainStreamСalculation;
+  const rangeСalculation = props.rangeСalculation;
 
   /**расчет поправок*/
   const amendmentExcessCalculation = () => {
     const heightBurst = +value.heightBurst;
-    const rangeBurst = +value.rangeBurst;
     const burningTime = +value.burningTime;
 
     let amendmentExcess = 0;
