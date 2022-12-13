@@ -14,7 +14,7 @@ const FiringEquipmentRGM = props => {
   const calculatedAngleFromMainStreamСalculation =
     +props.calculatedAngleFromMainStreamСalculation;
   const jumpCalculation = props.jumpCalculation;
-  const fanCalculation = +props.fanCalculation;
+  const fanCalculation = props.fanCalculation;
   const intervalFanCalculation = props.intervalFanCalculation;
   const time = props.returnDataST.time;
 
@@ -35,7 +35,7 @@ const FiringEquipmentRGM = props => {
       text: `Пр: ${rangeFinalСalculation}`,
     },
     {
-      text: replaceAngle(fanCalculation),
+      text: fanCalculation,
     },
     {
       text: `ΔД: ${amendmentRange}`,

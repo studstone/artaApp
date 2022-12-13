@@ -79,7 +79,7 @@ const BatteryCommander = () => {
 
   const [targetData, setTargetData] = React.useState({...initTargetData});
   const [burstData, setBurstData] = React.useState({...initBurstData});
-  // console.log(burstData);
+
   const [isLoading, setIsLoading] = React.useState(true);
 
   const changeBasicData = React.useCallback(
@@ -780,7 +780,7 @@ const BatteryCommander = () => {
             {/* Цель */}
             <DescriptionTarget value={targetData} setValue={changeTargetData} />
             <TouchableOpacity
-              // disabled={targetData.numberTarget.length === 0}
+              disabled={targetData.numberTarget.length === 0}
               onPress={addTargets}
               style={styles.buttonStop}>
               <Text

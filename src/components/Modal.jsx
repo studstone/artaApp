@@ -380,6 +380,44 @@ export default React.memo(function ModalBlock({
     }
     return angleWinds;
   };
+  const angleTransformationIllum = a => {
+    let angleWinds = a;
+
+    if (angleWinds === 60 || angleWinds === 30) {
+      angleWinds = 0;
+    } else if (angleWinds === 29 || angleWinds === 31 || angleWinds === 59) {
+      angleWinds = 1;
+    } else if (angleWinds === 28 || angleWinds === 32 || angleWinds === 58) {
+      angleWinds = 2;
+    } else if (angleWinds === 27 || angleWinds === 33 || angleWinds === 57) {
+      angleWinds = 3;
+    } else if (angleWinds === 26 || angleWinds === 34 || angleWinds === 56) {
+      angleWinds = 4;
+    } else if (angleWinds === 25 || angleWinds === 35 || angleWinds === 55) {
+      angleWinds = 5;
+    } else if (angleWinds === 24 || angleWinds === 36 || angleWinds === 54) {
+      angleWinds = 6;
+    } else if (angleWinds === 23 || angleWinds === 37 || angleWinds === 53) {
+      angleWinds = 7;
+    } else if (angleWinds === 22 || angleWinds === 38 || angleWinds === 52) {
+      angleWinds = 8;
+    } else if (angleWinds === 21 || angleWinds === 39 || angleWinds === 51) {
+      angleWinds = 9;
+    } else if (angleWinds === 20 || angleWinds === 40 || angleWinds === 50) {
+      angleWinds = 10;
+    } else if (angleWinds === 19 || angleWinds === 41 || angleWinds === 49) {
+      angleWinds = 11;
+    } else if (angleWinds === 18 || angleWinds === 42 || angleWinds === 48) {
+      angleWinds = 12;
+    } else if (angleWinds === 17 || angleWinds === 43 || angleWinds === 47) {
+      angleWinds = 13;
+    } else if (angleWinds === 16 || angleWinds === 44 || angleWinds === 46) {
+      angleWinds = 14;
+    } else if (angleWinds === 45) {
+      angleWinds = 15;
+    }
+    return angleWinds;
+  };
   /** рассчитываем Wx Wz */
   const returnLinkingWinds = () => {
     try {
@@ -458,6 +496,128 @@ export default React.memo(function ModalBlock({
       return {Wx, Wz};
     }
   };
+  const returnLinkingWindsIllum = (a, b, c) => {
+    try {
+      const angle = a;
+      const angleTransform = b;
+
+      let Wx = 0;
+      let Wz = 0;
+
+      if (c > 20) {
+        let Wx1 = componentsWind
+          .filter(el => el.Aw === angleTransform)
+          .find(el => el.Vw === 20).Wx;
+        let Wz1 = componentsWind
+          .filter(el => el.Aw === angleTransform)
+          .find(el => el.Vw === 20).Wz;
+        let Wx2 = componentsWind
+          .filter(el => el.Aw === angleTransform)
+          .find(el => el.Vw === c - 20).Wx;
+        let Wz2 = componentsWind
+          .filter(el => el.Aw === angleTransform)
+          .find(el => el.Vw === c - 20).Wz;
+
+        if (angle >= 0 && angle <= 15) {
+          Wx1 = Wx1 * -1;
+          Wx2 = Wx2 * -1;
+          Wz1 = Wz1 * +1;
+          Wz2 = Wz2 * +1;
+        } else if (angle >= 16 && angle <= 30) {
+          Wx1 = Wx1 * +1;
+          Wx2 = Wx2 * +1;
+          Wz1 = Wz1 * +1;
+          Wz2 = Wz2 * +1;
+        } else if (angle >= 31 && angle <= 45) {
+          Wx1 = Wx1 * +1;
+          Wx2 = Wx2 * +1;
+          Wz1 = Wz1 * -1;
+          Wz2 = Wz2 * -1;
+        } else if (angle >= 46 && angle <= 60) {
+          Wx1 = Wx1 * -1;
+          Wx2 = Wx2 * -1;
+          Wz1 = Wz1 * -1;
+          Wz2 = Wz2 * -1;
+        }
+
+        Wx = Wx1 + Wx2;
+        Wz = Wz1 + Wz2;
+      } else {
+        Wx = componentsWind
+          .filter(el => el.Aw === angleTransform)
+          .find(el => el.Vw === c).Wx;
+        Wz = componentsWind
+          .filter(el => el.Aw === angleTransform)
+          .find(el => el.Vw === c).Wz;
+
+        if (angle >= 0 && angle <= 15) {
+          Wx = Wx * -1;
+          Wz = Wz * +1;
+        } else if (angle >= 16 && angle <= 30) {
+          Wx = Wx * +1;
+          Wz = Wz * +1;
+        } else if (angle >= 31 && angle <= 45) {
+          Wx = Wx * +1;
+          Wz = Wz * -1;
+        } else if (angle >= 46 && angle <= 60) {
+          Wx = Wx * -1;
+          Wz = Wz * -1;
+        }
+      }
+
+      return {Wx, Wz};
+    } catch (error) {
+      const Wx = 0;
+      const Wz = 0;
+
+      return {Wx, Wz};
+    }
+  };
+  /**снос факела ветром */
+  const removingTorchCalculation = () => {
+    const angleWindsInit = +meteoData.directorateAngleWind + 2;
+
+    let angleWinds = angleTarget - angleWindsInit;
+
+    let angleWindsTransform = 0;
+    let speedNediumWind = 0;
+    let amendmentRange = 0;
+    let amendmentAngle = 0;
+    let Wx = 0;
+    let Wz = 0;
+
+    if (angleWinds < 0) {
+      angleWinds = angleWinds + 60;
+    } else {
+      angleWinds = angleWinds;
+    }
+
+    angleWindsTransform = angleTransformationIllum(angleWinds);
+
+    try {
+      speedNediumWind = windSpeedObj[meteoData.windSpeed][400];
+    } catch (error) {
+      speedNediumWind = 0;
+    }
+    Wx = returnLinkingWindsIllum(
+      angleWinds,
+      angleWindsTransform,
+      speedNediumWind,
+    ).Wx;
+    Wz = returnLinkingWindsIllum(
+      angleWinds,
+      angleWindsTransform,
+      speedNediumWind,
+    ).Wz;
+
+    if (rangeСalculation !== 0) {
+      amendmentRange = -35 * Wx;
+      amendmentAngle = -((35 * Wz) / (0.001 * rangeСalculation)) * 0.01;
+      return {amendmentRange, amendmentAngle};
+    } else {
+      return {amendmentRange, amendmentAngle};
+    }
+  };
   /**расчитываем суммарные поправки */
   const totalAmendmentsCalculation = React.useMemo(() => {
     let totalAmendmentInRange = 0;
@@ -478,11 +638,24 @@ export default React.memo(function ModalBlock({
             0.1 * returnDataST().dXt * returnDeviationAirTemperature() +
             returnDataST().dXv0 * totalDeviationInitialSpeedCalculation(),
         );
-        totalAmendmentInDirection = (
+        totalAmendmentInDirection =
           (returnDataST().z +
             0.1 * returnDataST().dZw * returnLinkingWinds().Wz) *
-          0.01
-        ).toFixed(2);
+          0.01;
+
+        if (basicData.fuseName === 2) {
+          totalAmendmentInRange =
+            totalAmendmentInRange + removingTorchCalculation().amendmentRange;
+
+          totalAmendmentInDirection = (
+            totalAmendmentInDirection +
+            removingTorchCalculation().amendmentAngle
+          ).toFixed(2);
+        } else {
+          totalAmendmentInRange = totalAmendmentInRange;
+          totalAmendmentInDirection = totalAmendmentInDirection.toFixed(2);
+        }
+
         return {totalAmendmentInRange, totalAmendmentInDirection};
       } else {
         return {totalAmendmentInRange, totalAmendmentInDirection};

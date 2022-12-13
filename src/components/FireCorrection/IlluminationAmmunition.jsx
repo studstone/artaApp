@@ -62,13 +62,12 @@ export default React.memo(function IlluminationAmmunition(props) {
   const angleFromMainStreamСalculation = props.angleFromMainStreamСalculation;
 
   /**расчет поправок*/
-  const proofreadingCalculationIllumination = () => {
+  const amendmentExcessCalculation = () => {
     const heightBurst = +value.heightBurst;
     const rangeBurst = +value.rangeBurst;
     const burningTime = +value.burningTime;
 
     let amendmentExcess = 0;
-    let amendmentRange = 400 / dXtis;
 
     const advantageousVerticalAngle = 50 / (0.001 * rangeCommander);
 
@@ -85,18 +84,6 @@ export default React.memo(function IlluminationAmmunition(props) {
       ).toFixed(2);
     }
 
-    if (rangeBurst > rangeCommander) {
-      amendmentRange = amendmentRange;
-    } else {
-      amendmentRange = -amendmentRange;
-    }
-
-    if (rangeBurst === 0) {
-      amendmentRange = 0;
-    } else {
-      amendmentRange = amendmentRange;
-    }
-
     if (isVisible) {
       if (heightBurst === 0) {
         amendmentExcess = 0;
@@ -111,7 +98,7 @@ export default React.memo(function IlluminationAmmunition(props) {
       }
     }
 
-    return {amendmentExcess, amendmentRange};
+    return amendmentExcess;
   };
   const proofreadingCalculationPolar = React.useMemo(() => {
     let proofreadingInAim = 0;
@@ -170,7 +157,7 @@ export default React.memo(function IlluminationAmmunition(props) {
         angleFromMainStreamСalculation - directionAlngle
       ).toFixed(2);
     }
-    return proofreadingInAngle;
+    return {proofreadingInAngle, proofreadingInAim};
   }, [value]);
 
   return (
@@ -218,14 +205,15 @@ export default React.memo(function IlluminationAmmunition(props) {
         )}
       </View>
       <View style={styles.answerWrapper}>
-        <Text style={styles.textAnswer}>{`ΔПр: ${
-          proofreadingCalculationIllumination().amendmentRange
-        }`}</Text>
+        <Text
+          style={
+            styles.textAnswer
+          }>{`ΔПр: ${proofreadingCalculationPolar.proofreadingInAim}`}</Text>
         <Text style={styles.textAnswer}>{`Δδ: ${replaceAngle(
-          proofreadingCalculationPolar,
+          proofreadingCalculationPolar.proofreadingInAngle,
         )}`}</Text>
         <Text style={styles.textAnswer}>{`ΔУр: ${replaceAngle(
-          proofreadingCalculationIllumination().amendmentExcess,
+          amendmentExcessCalculation(),
         )}`}</Text>
       </View>
     </>
