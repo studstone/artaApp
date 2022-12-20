@@ -642,7 +642,6 @@ export default React.memo(function ModalBlock({
           (returnDataST().z +
             0.1 * returnDataST().dZw * returnLinkingWinds().Wz) *
           0.01;
-
         if (basicData.fuseName === 2) {
           totalAmendmentInRange =
             totalAmendmentInRange + removingTorchCalculation().amendmentRange;

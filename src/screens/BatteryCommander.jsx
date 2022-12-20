@@ -249,6 +249,7 @@ const BatteryCommander = () => {
       let installationFuse = '';
       let time = 0;
       let Vd = 0;
+      let tube = 0;
 
       if (calculatedRangeСalculation !== 0) {
         if (basicData.trajectory === 0) {
@@ -283,6 +284,11 @@ const BatteryCommander = () => {
             .filter(el => el.name === basicData.nameCharge)
             .filter(el => el.trajectory === basicData.trajectory)
             .find(el => el.range >= rangeСalculation).Vd;
+          tube = shotingTables
+            .filter(el => el.fuse === basicData.fuseName)
+            .filter(el => el.name === basicData.nameCharge)
+            .filter(el => el.trajectory === basicData.trajectory)
+            .find(el => el.range >= rangeСalculation).tube;
         } else {
           supportingRange = shotingTables
             .filter(el => el.fuse === basicData.fuseName)
@@ -324,6 +330,7 @@ const BatteryCommander = () => {
           installationFuse,
           time,
           Vd,
+          tube,
         };
       } else {
         return {
@@ -344,6 +351,7 @@ const BatteryCommander = () => {
       const installationFuse = '';
       const time = 0;
       const Vd = 0;
+      const tube = 0;
 
       return {
         supportingRange,
@@ -353,6 +361,7 @@ const BatteryCommander = () => {
         installationFuse,
         time,
         Vd,
+        tube,
       };
     }
   }, [basicData, calculatedRangeСalculation]);
@@ -376,7 +385,7 @@ const BatteryCommander = () => {
     } else {
       return aim;
     }
-  }, [returnDataST.supportingAim, returnDataST.dXtis, returnDataST.dRange]);
+  }, [returnDataST, basicData]);
   // /*расчет уровня*/
   const excessСalculation = React.useMemo(() => {
     if (rangeСalculation !== 0) {
@@ -708,7 +717,7 @@ const BatteryCommander = () => {
     setTargets([]);
     setTargetData({...initTargetData});
   };
-  const objFunctionDCARGM = {
+  const objFunctionDCA = {
     amendmentDisplacementCalculation,
     removalCoefficientCalculation,
     stepAngomerCalculation,
@@ -720,7 +729,7 @@ const BatteryCommander = () => {
     replaceAngle,
     basicData,
   };
-  const objFunctionFERGM = {
+  const objFunctionFE = {
     rangeСalculation,
     replaceAngle,
     angleFromMainStreamСalculation,
@@ -783,15 +792,12 @@ const BatteryCommander = () => {
               disabled={targetData.numberTarget.length === 0}
               onPress={addTargets}
               style={styles.buttonStop}>
-              <Text
-                style={{color: '#ffffff', fontSize: 22, fontWeight: 'bold'}}>
-                Стой! Записать!
-              </Text>
+              <Text style={styles.textStop}>Стой! Записать!</Text>
             </TouchableOpacity>
             {/* Установки */}
-            <FiringEquipment {...objFunctionFERGM} />
+            <FiringEquipment {...objFunctionFE} />
             {/* Данные для расчета корректур */}
-            <DataCalcAdjustments {...objFunctionDCARGM} />
+            <DataCalcAdjustments {...objFunctionDCA} />
             {/* Рассчет коррекур */}
             <FireCorrection {...objFunctionFC} />
           </View>
@@ -812,6 +818,11 @@ const styles = StyleSheet.create({
     height: 45,
     backgroundColor: '#680202',
     borderRadius: 5,
+  },
+  textStop: {
+    color: '#ffffff',
+    fontSize: 22,
+    fontWeight: 'bold',
   },
 });
 
