@@ -12,7 +12,7 @@ const inputs = {
   },
   angleTarget: {
     placeholder: 'Уг на цель',
-    keyboardType: 'numbers-and-punctuation',
+    keyboardType: 'numeric',
     maxLength: 5,
     text: 'Уг.к:',
   },

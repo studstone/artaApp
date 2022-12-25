@@ -30,13 +30,13 @@ const inputs = {
   },
   deviationInitialSpeed: {
     placeholder: 'Откл.нач.ск.пол.сн',
-    keyboardType: 'numbers-and-punctuation',
+    keyboardType: 'numeric',
     text: 'Vо:',
     maxLength: 5,
   },
   chargeTemperature: {
     placeholder: 'Температура заряда',
-    keyboardType: 'numbers-and-punctuation',
+    keyboardType: 'numeric',
     text: 'Тз:',
     maxLength: 5,
   },

@@ -29,13 +29,13 @@ const inputs = {
     text: 'Гц:',
   },
   amendmentRange: {
-    keyboardType: 'numbers-and-punctuation',
+    keyboardType: 'numeric',
     placeholder: 'Попр. в дальн.',
     maxLength: 4,
     text: 'ΔД:',
   },
   amendmentAngle: {
-    keyboardType: 'numbers-and-punctuation',
+    keyboardType: 'numeric',
     placeholder: 'Попр. в напр.',
     maxLength: 5,
     text: 'Δδ:',
