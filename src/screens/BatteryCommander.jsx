@@ -242,6 +242,23 @@ const BatteryCommander = () => {
   // /*расчет данных ТС*/
   const returnDataST = React.useMemo(() => {
     try {
+      const filterHangTrajectory = shotingTables
+        .filter(el => el.fuse === basicData.fuseName)
+        .filter(el => el.name === basicData.nameCharge)
+        .filter(el => el.trajectory === basicData.trajectory)
+        .find(el => el.range >= calculatedRangeСalculation);
+
+      const filterMortaryTrajectory = shotingTables
+        .filter(el => el.fuse === basicData.fuseName)
+        .filter(el => el.name === basicData.nameCharge)
+        .filter(el => el.trajectory === basicData.trajectory)
+        .find(el => el.range <= calculatedRangeСalculation);
+
+      const arr = shotingTables
+        .filter(el => el.fuse === basicData.fuseName)
+        .filter(el => el.name === basicData.nameCharge)
+        .filter(el => el.trajectory === basicData.trajectory);
+
       let supportingRange = 0;
       let supportingAim = 0;
       let dXtis = 0;
@@ -250,77 +267,39 @@ const BatteryCommander = () => {
       let time = 0;
       let Vd = 0;
       let tube = 0;
+      let rangeMin = 0;
+      let rangeMax = 0;
+
+      if (basicData.trajectory === 0) {
+        rangeMin = arr[0].range;
+        rangeMax = arr[arr.length - 1].range;
+      } else {
+        rangeMax = arr[0].range;
+        rangeMin = arr[arr.length - 1].range;
+      }
 
       if (calculatedRangeСalculation !== 0) {
         if (basicData.trajectory === 0) {
-          supportingRange = shotingTables
-            .filter(el => el.fuse === basicData.fuseName)
-            .filter(el => el.name === basicData.nameCharge)
-            .filter(el => el.trajectory === basicData.trajectory)
-            .find(el => el.range >= rangeСalculation).range;
-          supportingAim = shotingTables
-            .filter(el => el.fuse === basicData.fuseName)
-            .filter(el => el.name === basicData.nameCharge)
-            .filter(el => el.trajectory === basicData.trajectory)
-            .find(el => el.range >= rangeСalculation).aim;
-          dXtis = shotingTables
-            .filter(el => el.fuse === basicData.fuseName)
-            .filter(el => el.name === basicData.nameCharge)
-            .filter(el => el.trajectory === basicData.trajectory)
-            .find(el => el.range >= rangeСalculation).dXtis;
+          supportingRange = filterHangTrajectory.range;
+          supportingAim = filterHangTrajectory.aim;
+          dXtis = filterHangTrajectory.dXtis;
           dRange = supportingRange - rangeСalculation;
-          installationFuse = shotingTables
-            .filter(el => el.fuse === basicData.fuseName)
-            .filter(el => el.name === basicData.nameCharge)
-            .filter(el => el.trajectory === basicData.trajectory)
-            .find(el => el.range >= rangeСalculation).installationFuse;
-          time = shotingTables
-            .filter(el => el.fuse === basicData.fuseName)
-            .filter(el => el.name === basicData.nameCharge)
-            .filter(el => el.trajectory === basicData.trajectory)
-            .find(el => el.range >= rangeСalculation).Tc;
-          Vd = shotingTables
-            .filter(el => el.fuse === basicData.fuseName)
-            .filter(el => el.name === basicData.nameCharge)
-            .filter(el => el.trajectory === basicData.trajectory)
-            .find(el => el.range >= rangeСalculation).Vd;
-          tube = shotingTables
-            .filter(el => el.fuse === basicData.fuseName)
-            .filter(el => el.name === basicData.nameCharge)
-            .filter(el => el.trajectory === basicData.trajectory)
-            .find(el => el.range >= rangeСalculation).tube;
+          installationFuse = filterHangTrajectory.installationFuse;
+          time = filterHangTrajectory.Tc;
+          Vd = filterHangTrajectory.Vd;
+          tube = filterHangTrajectory.tube;
+          rangeMin = arr[0].range;
+          rangeMax = arr[arr.length - 1].range;
         } else {
-          supportingRange = shotingTables
-            .filter(el => el.fuse === basicData.fuseName)
-            .filter(el => el.name === basicData.nameCharge)
-            .filter(el => el.trajectory === basicData.trajectory)
-            .find(el => el.range <= rangeСalculation).range;
-          supportingAim = shotingTables
-            .filter(el => el.fuse === basicData.fuseName)
-            .filter(el => el.name === basicData.nameCharge)
-            .filter(el => el.trajectory === basicData.trajectory)
-            .find(el => el.range <= rangeСalculation).aim;
-          dXtis = shotingTables
-            .filter(el => el.fuse === basicData.fuseName)
-            .filter(el => el.name === basicData.nameCharge)
-            .filter(el => el.trajectory === basicData.trajectory)
-            .find(el => el.range <= rangeСalculation).dXtis;
+          supportingRange = filterMortaryTrajectory.range;
+          supportingAim = filterMortaryTrajectory.aim;
+          dXtis = filterMortaryTrajectory.dXtis;
           dRange = rangeСalculation - supportingRange;
-          installationFuse = shotingTables
-            .filter(el => el.fuse === basicData.fuseName)
-            .filter(el => el.name === basicData.nameCharge)
-            .filter(el => el.trajectory === basicData.trajectory)
-            .find(el => el.range <= rangeСalculation).installationFuse;
-          time = shotingTables
-            .filter(el => el.fuse === basicData.fuseName)
-            .filter(el => el.name === basicData.nameCharge)
-            .filter(el => el.trajectory === basicData.trajectory)
-            .find(el => el.range <= rangeСalculation).Tc;
-          Vd = shotingTables
-            .filter(el => el.fuse === basicData.fuseName)
-            .filter(el => el.name === basicData.nameCharge)
-            .filter(el => el.trajectory === basicData.trajectory)
-            .find(el => el.range <= rangeСalculation).Vd;
+          installationFuse = filterMortaryTrajectory.installationFuse;
+          time = filterMortaryTrajectory.Tc;
+          Vd = filterMortaryTrajectory.Vd;
+          rangeMax = arr[0].range;
+          rangeMin = arr[arr.length - 1].range;
         }
         return {
           supportingRange,
@@ -331,6 +310,8 @@ const BatteryCommander = () => {
           time,
           Vd,
           tube,
+          rangeMin,
+          rangeMax,
         };
       } else {
         return {
@@ -341,6 +322,8 @@ const BatteryCommander = () => {
           installationFuse,
           time,
           Vd,
+          rangeMin,
+          rangeMax,
         };
       }
     } catch (err) {
@@ -352,6 +335,8 @@ const BatteryCommander = () => {
       const time = 0;
       const Vd = 0;
       const tube = 0;
+      const rangeMin = 0;
+      const rangeMax = 0;
 
       return {
         supportingRange,
@@ -362,6 +347,8 @@ const BatteryCommander = () => {
         time,
         Vd,
         tube,
+        rangeMin,
+        rangeMax,
       };
     }
   }, [basicData, calculatedRangeСalculation]);
@@ -774,7 +761,11 @@ const BatteryCommander = () => {
           />
           <View>
             {/* Вхoдные данные */}
-            <BasicData value={basicData} setValue={changeBasicData} />
+            <BasicData
+              value={basicData}
+              setValue={changeBasicData}
+              returnDataST={returnDataST}
+            />
             {/* КНП */}
             <ObservationPost value={OPData} setValue={changeOPData} />
             {/* Огневая */}

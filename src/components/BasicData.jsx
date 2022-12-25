@@ -54,7 +54,8 @@ const selects = {
   },
 };
 
-export default React.memo(function BasicData({value, setValue}) {
+export default React.memo(function BasicData({value, setValue, returnDataST}) {
+  console.log(returnDataST);
   return (
     <View style={styles.wrapper}>
       <>
@@ -74,6 +75,12 @@ export default React.memo(function BasicData({value, setValue}) {
           </View>
         ))}
       </>
+      {returnDataST.rangeMin !== 0 && (
+        <View style={styles.wrapperRange}>
+          <Text style={styles.textRange}>Дmin: {returnDataST.rangeMin}</Text>
+          <Text style={styles.textRange}>Дmax: {returnDataST.rangeMax}</Text>
+        </View>
+      )}
       {Object.entries(inputs).map(([key, item]) => (
         <Input
           key={key}
@@ -119,4 +126,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 7,
   },
+  wrapperRange: {
+    width: '100%',
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  textRange: {fontSize: 24, color: '#750000', width: '50%'},
 });
