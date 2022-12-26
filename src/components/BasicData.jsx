@@ -55,7 +55,6 @@ const selects = {
 };
 
 export default React.memo(function BasicData({value, setValue, returnDataST}) {
-  console.log(returnDataST);
   return (
     <View style={styles.wrapper}>
       <>

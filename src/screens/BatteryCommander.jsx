@@ -288,8 +288,6 @@ const BatteryCommander = () => {
           time = filterHangTrajectory.Tc;
           Vd = filterHangTrajectory.Vd;
           tube = filterHangTrajectory.tube;
-          rangeMin = arr[0].range;
-          rangeMax = arr[arr.length - 1].range;
         } else {
           supportingRange = filterMortaryTrajectory.range;
           supportingAim = filterMortaryTrajectory.aim;
@@ -298,8 +296,6 @@ const BatteryCommander = () => {
           installationFuse = filterMortaryTrajectory.installationFuse;
           time = filterMortaryTrajectory.Tc;
           Vd = filterMortaryTrajectory.Vd;
-          rangeMax = arr[0].range;
-          rangeMin = arr[arr.length - 1].range;
         }
         return {
           supportingRange,
