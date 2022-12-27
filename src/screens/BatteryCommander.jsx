@@ -10,7 +10,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import ModalBlock from '../components/Modal';
-import BasicData from '../components/BasicData';
+import BasicData from '../components/BasicData/BasicData';
 import ObservationPost from '../components/ObservationPost';
 import FirePosition from '../components/FirePosition';
 import TargetsList from '../components/TargetsList';
@@ -362,13 +362,14 @@ const BatteryCommander = () => {
     }
 
     let aim = supportingAim - dAim;
-
     if (aim < 0) {
       return (aim = 0);
     } else {
       return aim;
     }
   }, [returnDataST, basicData]);
+  /** расчет трубки */
+  const tubeCalculation = React.useMemo(() => {}, [returnDataST, basicData]);
   // /*расчет уровня*/
   const excessСalculation = React.useMemo(() => {
     if (rangeСalculation !== 0) {

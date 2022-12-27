@@ -1,30 +1,11 @@
 import React from 'react';
 import {StyleSheet, View, Text} from 'react-native';
-import SelectDropdown from 'react-native-select-dropdown';
 
-import Input from './Input';
-
-const fuse = [
-  {text: 'РГМ-2М', id: 0},
-  {text: 'В-90', id: 1},
-  {text: 'Т-7', id: 2},
-  {text: 'Т-90', id: 3},
-  {text: 'ДТМ-75', id: 4},
-];
-
-const charges = [
-  {text: 'п', id: 0},
-  {text: 'у', id: 1},
-  {text: 1, id: 2},
-  {text: 2, id: 3},
-  {text: 3, id: 4},
-  {text: 4, id: 5},
-];
-
-const trajectories = [
-  {text: 'н', id: 0},
-  {text: 'м', id: 1},
-];
+import Input from '../Input';
+import SelectDTM75 from './SelectDTM75';
+import SelectRGM from './SelectRGM';
+import SelectT7 from './SelectT7';
+import SelectT90 from './SelectT90';
 
 const inputs = {
   mainStream: {
@@ -39,40 +20,23 @@ const inputs = {
   },
 };
 
-const selects = {
-  fuseName: {
-    data: fuse,
-    defaultButtonText: 'Взрыватель',
-  },
-  trajectory: {
-    data: trajectories,
-    defaultButtonText: 'Траектория',
-  },
-  nameCharge: {
-    data: charges,
-    defaultButtonText: 'Заряд',
-  },
-};
-
 export default React.memo(function BasicData({value, setValue, returnDataST}) {
   return (
     <View style={styles.wrapper}>
       <>
-        {Object.entries(selects).map(([key, item], index) => (
-          <View style={{width: index === 0 ? '100%' : '49%'}} key={key}>
-            <SelectDropdown
-              buttonStyle={styles.select}
-              data={item.data}
-              rowTextForSelection={item => item.text}
-              buttonTextAfterSelection={item => item.text}
-              onSelect={item => {
-                setValue(key, item.id);
-              }}
-              defaultButtonText={item.defaultButtonText}
-              defaultValueByIndex={value[key]}
-            />
-          </View>
-        ))}
+        {value.fuseName === 0 && (
+          <SelectRGM value={value} setValue={setValue} />
+        )}
+        {value.fuseName === 1 && (
+          <SelectRGM value={value} setValue={setValue} />
+        )}
+        {value.fuseName === 2 && <SelectT7 value={value} setValue={setValue} />}
+        {value.fuseName === 3 && (
+          <SelectT90 value={value} setValue={setValue} />
+        )}
+        {value.fuseName === 4 && (
+          <SelectDTM75 value={value} setValue={setValue} />
+        )}
       </>
       {returnDataST.rangeMin !== 0 && (
         <View style={styles.wrapperRange}>
