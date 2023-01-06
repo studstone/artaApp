@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Geolocation from '@react-native-community/geolocation';
 
 import ModalBlock from '../components/Modal';
 import BasicData from '../components/BasicData/BasicData';
@@ -22,6 +23,8 @@ import shotingTables from '../DB/shotingTables';
 import DataCalcAdjustments from '../components/DataCalculatingAdjustments/DataCalcAdjustments';
 import FiringEquipment from '../components/FiringEqipment/FiringEquipment';
 
+import WGS84inSK42 from '../lib/WGS84inSK42';
+
 const initBasicData = {
   fuseName: null,
   mainStream: '',
@@ -34,12 +37,13 @@ const initOPData = {
   coordinateOPX: '',
   coordinateOPY: '',
   heightOP: '',
+  startLocationOP: false,
 };
-
 const initFPData = {
   coordinateFPX: '',
   coordinateFPY: '',
   heightFP: '',
+  startLocationFP: false,
 };
 
 const initTargetData = {
@@ -69,11 +73,20 @@ const initBurstData = {
   burningTime: '',
 };
 
+const initGeoCoordinats = {
+  latitude: null,
+  longitude: null,
+  accuracy: null,
+};
+
 const BatteryCommander = () => {
+  const [geoCoordinatsData, setGeoCoordinatsData] = React.useState({
+    ...initGeoCoordinats,
+  });
   const [basicData, setBasicData] = React.useState({...initBasicData});
   const [OPData, setOPData] = React.useState({...initOPData});
   const [FPData, setFPData] = React.useState({...initFPData});
-
+  console.log(geoCoordinatsData);
   const [targets, setTargets] = React.useState([]);
   const [activeTarget, setActiveTarget] = React.useState(null);
 
@@ -81,6 +94,7 @@ const BatteryCommander = () => {
   const [burstData, setBurstData] = React.useState({...initBurstData});
 
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isGeolacation, setIsGeolacation] = React.useState(false);
 
   const changeBasicData = React.useCallback(
     (key, value) => {
@@ -743,6 +757,46 @@ const BatteryCommander = () => {
     removalCoefficientCalculation,
     rangeCommanderCalculation,
   };
+
+  const onChangeGeoCoordinats = () => {
+    setGeoCoordinatsData({...initGeoCoordinats});
+
+    Geolocation.getCurrentPosition(
+      ({coords}) => {
+        setGeoCoordinatsData({
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          accuracy: coords.accuracy,
+        });
+        setIsGeolacation(true);
+      },
+      error => {
+        console.log(error.code, error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 600000,
+        maximumAge: 100,
+        distanceFilter: 100,
+      },
+    );
+  };
+
+  React.useEffect(() => {
+    if (OPData.startLocationOP) {
+      changeOPData('coordinateOPX', WGS84inSK42(geoCoordinatsData).X);
+      changeOPData('coordinateOPY', WGS84inSK42(geoCoordinatsData).Y);
+      changeOPData('heightOP', WGS84inSK42(geoCoordinatsData).H_WGS84);
+      changeOPData('startLocationOP', false);
+    } else if (FPData.startLocationFP) {
+      changeFPData('coordinateFPX', WGS84inSK42(geoCoordinatsData).X);
+      changeFPData('coordinateFPY', WGS84inSK42(geoCoordinatsData).Y);
+      changeFPData('heightFP', WGS84inSK42(geoCoordinatsData).H_WGS84);
+      changeFPData('startLocationFP', false);
+    }
+    setIsGeolacation(false);
+  }, [isGeolacation]);
+
   return (
     <>
       {!isLoading && (
@@ -764,9 +818,19 @@ const BatteryCommander = () => {
               returnDataST={returnDataST}
             />
             {/* КНП */}
-            <ObservationPost value={OPData} setValue={changeOPData} />
+            <ObservationPost
+              value={OPData}
+              setValue={changeOPData}
+              disabled={FPData.startLocationFP}
+              onPress={onChangeGeoCoordinats}
+            />
             {/* Огневая */}
-            <FirePosition value={FPData} setValue={changeFPData} />
+            <FirePosition
+              value={FPData}
+              setValue={changeFPData}
+              disabled={OPData.startLocationOP}
+              onPress={onChangeGeoCoordinats}
+            />
             <TargetsList
               data={targets}
               active={activeTarget}

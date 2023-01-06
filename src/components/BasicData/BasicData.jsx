@@ -24,6 +24,9 @@ export default React.memo(function BasicData({value, setValue, returnDataST}) {
   return (
     <View style={styles.wrapper}>
       <>
+        {value.fuseName === null && (
+          <SelectRGM value={value} setValue={setValue} />
+        )}
         {value.fuseName === 0 && (
           <SelectRGM value={value} setValue={setValue} />
         )}

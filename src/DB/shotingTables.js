@@ -12954,6 +12954,28 @@ const shotingTables = [
     Tc: 40,
     Yb: 1900,
   },
+  {
+    id: 585,
+    fuse: 1,
+    installationFuse: 'T-90',
+    name: 0,
+    trajectory: 0,
+    range: 6200,
+    aim: 176,
+    tube: 66,
+    dXtis: 67,
+    Vd: 69,
+    Vb: 4.9,
+    Z: -4,
+    dZw: -6,
+    dXw: -228,
+    dXh: 29,
+    dXhh: -0.19,
+    dXt: -126,
+    dXv0: -80,
+    Tc: 40,
+    Yb: 1900,
+  },
 ];
 
 export default shotingTables;

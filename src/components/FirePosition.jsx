@@ -2,6 +2,7 @@ import React from 'react';
 import {StyleSheet, View} from 'react-native';
 
 import Input from './Input';
+import SwitchBlock from './SwitchBlock';
 
 const inputs = {
   coordinateFPX: {
@@ -21,23 +22,38 @@ const inputs = {
   },
 };
 
-export default React.memo(function FirePosition({value, setValue}) {
+export default React.memo(function FirePosition({
+  value,
+  setValue,
+  disabled,
+  onPress,
+}) {
   return (
-    <View style={styles.wrapper}>
-      {Object.entries(inputs).map(([key, item]) => (
-        <Input
-          key={key}
-          state={value[key]}
-          keyboardType={'numeric'}
-          setState={value => setValue(key, value)}
-          placeholder={item.placeholder}
-          placeholderTextColor={'black'}
-          maxLength={item.maxLength}
-          text={item.text}
-          style={styles.inputWrapper}
-        />
-      ))}
-    </View>
+    <>
+      <SwitchBlock
+        value={value.startLocationFP}
+        setValue={value => setValue('startLocationFP', value)}
+        textTrue=""
+        textFalse="Определить"
+        disabled={disabled}
+        onPress={onPress}
+      />
+      <View style={styles.wrapper}>
+        {Object.entries(inputs).map(([key, item]) => (
+          <Input
+            key={key}
+            state={value[key]}
+            keyboardType={'numeric'}
+            setState={value => setValue(key, value)}
+            placeholder={item.placeholder}
+            placeholderTextColor={'black'}
+            maxLength={item.maxLength}
+            text={item.text}
+            style={styles.inputWrapper}
+          />
+        ))}
+      </View>
+    </>
   );
 });
 
