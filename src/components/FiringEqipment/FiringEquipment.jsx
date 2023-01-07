@@ -10,6 +10,7 @@ export default React.memo(function FiringEquipment(props) {
     <>
       {fuseName === 0 && <FiringEquipmentRGM {...props} />}
       {fuseName === 2 && <FiringEquipmentT7 {...props} />}
+      {fuseName === 3 && <FiringEquipmentT7 {...props} />}
     </>
   );
 });

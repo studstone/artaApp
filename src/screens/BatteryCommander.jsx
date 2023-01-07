@@ -86,7 +86,7 @@ const BatteryCommander = () => {
   const [basicData, setBasicData] = React.useState({...initBasicData});
   const [OPData, setOPData] = React.useState({...initOPData});
   const [FPData, setFPData] = React.useState({...initFPData});
-  console.log(geoCoordinatsData);
+
   const [targets, setTargets] = React.useState([]);
   const [activeTarget, setActiveTarget] = React.useState(null);
 
@@ -276,6 +276,7 @@ const BatteryCommander = () => {
       let supportingRange = 0;
       let supportingAim = 0;
       let dXtis = 0;
+      let dNtis = 0;
       let dRange = 0;
       let installationFuse = '';
       let time = 0;
@@ -297,6 +298,7 @@ const BatteryCommander = () => {
           supportingRange = filterHangTrajectory.range;
           supportingAim = filterHangTrajectory.aim;
           dXtis = filterHangTrajectory.dXtis;
+          dNtis = filterHangTrajectory.dNtis;
           dRange = supportingRange - rangeСalculation;
           installationFuse = filterHangTrajectory.installationFuse;
           time = filterHangTrajectory.Tc;
@@ -315,6 +317,7 @@ const BatteryCommander = () => {
           supportingRange,
           supportingAim,
           dXtis,
+          dNtis,
           dRange,
           installationFuse,
           time,
@@ -328,10 +331,12 @@ const BatteryCommander = () => {
           supportingRange,
           supportingAim,
           dXtis,
+          dNtis,
           dRange,
           installationFuse,
           time,
           Vd,
+          tube,
           rangeMin,
           rangeMax,
         };
@@ -340,6 +345,7 @@ const BatteryCommander = () => {
       const supportingRange = 0;
       const supportingAim = 0;
       const dXtis = 0;
+      const dNtis = 0;
       const dRange = 0;
       const installationFuse = '';
       const time = 0;
@@ -347,11 +353,11 @@ const BatteryCommander = () => {
       const tube = 0;
       const rangeMin = 0;
       const rangeMax = 0;
-
       return {
         supportingRange,
         supportingAim,
         dXtis,
+        dNtis,
         dRange,
         installationFuse,
         time,
@@ -383,7 +389,16 @@ const BatteryCommander = () => {
     }
   }, [returnDataST, basicData]);
   /** расчет трубки */
-  const tubeCalculation = React.useMemo(() => {}, [returnDataST, basicData]);
+  const tubeCalculation = React.useMemo(() => {
+    const supportingAim = returnDataST.supportingAim;
+    const supportingTube = returnDataST.tube;
+    const dNtis = returnDataST.dNtis;
+    const aim = rangeFinalСalculation;
+
+    const dAim = aim - supportingAim;
+    const tube = Math.round(dAim * dNtis + supportingTube);
+    return tube;
+  }, [returnDataST, basicData]);
   // /*расчет уровня*/
   const excessСalculation = React.useMemo(() => {
     if (rangeСalculation !== 0) {
@@ -736,6 +751,7 @@ const BatteryCommander = () => {
     calculatedRangeСalculation,
     choosingFuseInstallation,
     rangeFinalСalculation,
+    tubeCalculation,
     excessСalculation,
     calculatedAngleFromMainStreamСalculation,
     jumpCalculation,

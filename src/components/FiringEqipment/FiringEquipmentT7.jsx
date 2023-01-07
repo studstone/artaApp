@@ -16,7 +16,7 @@ export default React.memo(function FiringEquipmentT7(props) {
   const fanCalculation = props.fanCalculation;
   const intervalFanCalculation = props.intervalFanCalculation;
   const time = props.returnDataST.time;
-  const tube = props.returnDataST.tube;
+  const tube = props.tubeCalculation;
 
   const items = [
     {
