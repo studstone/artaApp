@@ -56,7 +56,6 @@ export default React.memo(function IlluminationAmmunition(props) {
   const basicData = props.basicData;
   const rangeCommander = props.rangeCommanderCalculation;
   const removalCoefficien = +props.removalCoefficientCalculation;
-  const dXtis = props.returnDataST.dXtis;
   const replaceAngle = props.replaceAngle;
   const returnDataST = props.returnDataST;
   const angleFromMainStreamСalculation = props.angleFromMainStreamСalculation;

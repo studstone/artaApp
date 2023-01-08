@@ -282,6 +282,7 @@ const BatteryCommander = () => {
       let time = 0;
       let Vd = 0;
       let tube = 0;
+      let hn = 0;
       let rangeMin = 0;
       let rangeMax = 0;
 
@@ -304,6 +305,7 @@ const BatteryCommander = () => {
           time = filterHangTrajectory.Tc;
           Vd = filterHangTrajectory.Vd;
           tube = filterHangTrajectory.tube;
+          hn = filterHangTrajectory.hn;
         } else {
           supportingRange = filterMortaryTrajectory.range;
           supportingAim = filterMortaryTrajectory.aim;
@@ -323,6 +325,7 @@ const BatteryCommander = () => {
           time,
           Vd,
           tube,
+          hn,
           rangeMin,
           rangeMax,
         };
@@ -337,6 +340,7 @@ const BatteryCommander = () => {
           time,
           Vd,
           tube,
+          hn,
           rangeMin,
           rangeMax,
         };
@@ -351,6 +355,7 @@ const BatteryCommander = () => {
       const time = 0;
       const Vd = 0;
       const tube = 0;
+      const hn = 0;
       const rangeMin = 0;
       const rangeMax = 0;
       return {
@@ -363,6 +368,7 @@ const BatteryCommander = () => {
         time,
         Vd,
         tube,
+        hn,
         rangeMin,
         rangeMax,
       };
@@ -412,25 +418,19 @@ const BatteryCommander = () => {
           +OPData.heightOP +
           (targetData.rangeTarget * targetData.verticalAngleTarget) / 955;
       }
-      const excess = (
-        ((height - FPData.heightFP) / (0.001 * topographicRange)) * 0.01 +
-        30
-      ).toFixed(2);
+      let excess =
+        ((height - FPData.heightFP) / (0.001 * topographicRange)) * 0.01 + 30;
 
-      return excess;
+      if (basicData.fuseName === 4) {
+        excess += 0.15;
+      }
+
+      return excess.toFixed(2);
     } else {
       const excess = 0;
       return excess;
     }
-  }, [
-    rangeСalculation,
-    FPData.heightFP,
-    targetData.rangeTarget,
-    targetData.verticalAngleTarget || rangeСalculation,
-    FPData.heightFP,
-    targetData.rangeTarget,
-    targetData.heightTarget,
-  ]);
+  }, [FPData, targetData, basicData]);
   // /*расчет дир.угл б-ц*/
   const angleСalculation = React.useMemo(() => {
     let directionalAngle = 0;
