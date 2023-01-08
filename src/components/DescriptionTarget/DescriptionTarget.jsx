@@ -42,7 +42,21 @@ const inputs = {
   },
 };
 
-export default React.memo(function DescriptionTarget({value, setValue}) {
+export default React.memo(function DescriptionTarget({
+  value,
+  setValue,
+  fuseName,
+}) {
+  if (fuseName === 1 || fuseName === 4) {
+    inputs.amendmentTube = {
+      keyboardType: 'numeric',
+      placeholder: 'Попр. в трубку.',
+      maxLength: 3,
+      text: 'ΔN:',
+    };
+  } else {
+    delete inputs.amendmentTube;
+  }
   return (
     <View style={styles.wrapper}>
       {Object.entries(inputs).map(([key, item]) => (

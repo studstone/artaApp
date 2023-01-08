@@ -255,6 +255,10 @@ export default React.memo(function ModalBlock({
       let dXh = 0;
       let dXt = 0;
       let dXv0 = 0;
+      let dNw = 0;
+      let dNh = 0;
+      let dNt = 0;
+      let dNv0 = 0;
 
       if (basicData.trajectory === 0) {
         z = shotingTables
@@ -287,6 +291,26 @@ export default React.memo(function ModalBlock({
           .filter(el => el.name === basicData.nameCharge)
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range >= rangeСalculation).dXv0;
+        dNw = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
+          .find(el => el.range >= rangeСalculation).dNw;
+        dNh = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
+          .find(el => el.range >= rangeСalculation).dNh;
+        dNt = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
+          .find(el => el.range >= rangeСalculation).dNt;
+        dNv0 = shotingTables
+          .filter(el => el.fuse === basicData.fuseName)
+          .filter(el => el.name === basicData.nameCharge)
+          .filter(el => el.trajectory === basicData.trajectory)
+          .find(el => el.range >= rangeСalculation).dNv0;
       } else {
         z = shotingTables
           .filter(el => el.fuse === basicData.fuseName)
@@ -319,7 +343,7 @@ export default React.memo(function ModalBlock({
           .filter(el => el.trajectory === basicData.trajectory)
           .find(el => el.range <= rangeСalculation).dXv0;
       }
-      return {z, dZw, dXw, dXh, dXt, dXv0};
+      return {z, dZw, dXw, dXh, dXt, dXv0, dNw, dNh, dNt, dNv0};
     } catch (err) {
       const z = 0;
       const dZw = 0;
@@ -327,8 +351,11 @@ export default React.memo(function ModalBlock({
       const dXh = 0;
       const dXt = 0;
       const dXv0 = 0;
-
-      return {z, dZw, dXw, dXh, dXt, dXv0};
+      const dNw = 0;
+      const dNh = 0;
+      const dNt = 0;
+      const dNv0 = 0;
+      return {z, dZw, dXw, dXh, dXt, dXv0, dNw, dNh, dNt, dNv0};
     }
   };
   /**рассчитываем угол ветра */
@@ -622,6 +649,7 @@ export default React.memo(function ModalBlock({
   const totalAmendmentsCalculation = React.useMemo(() => {
     let totalAmendmentInRange = 0;
     let totalAmendmentInDirection = 0;
+    let totalAmendmentInTube = 0;
     if (rangeСalculation !== 0) {
       if (
         meteoData.airTemperature !== '' &&
@@ -638,6 +666,12 @@ export default React.memo(function ModalBlock({
             0.1 * returnDataST().dXt * returnDeviationAirTemperature() +
             returnDataST().dXv0 * totalDeviationInitialSpeedCalculation(),
         );
+        totalAmendmentInTube = Math.round(
+          0.1 * returnDataST().dNw * returnLinkingWinds().Wx +
+            0.1 * returnDataST().dNh * deviationGroundPressureCalculation() +
+            0.1 * returnDataST().dNt * returnDeviationAirTemperature() +
+            returnDataST().dNv0 * totalDeviationInitialSpeedCalculation(),
+        );
         totalAmendmentInDirection =
           (returnDataST().z +
             0.1 * returnDataST().dZw * returnLinkingWinds().Wz) *
@@ -645,7 +679,6 @@ export default React.memo(function ModalBlock({
         if (basicData.fuseName === 2 || 3) {
           totalAmendmentInRange =
             totalAmendmentInRange + removingTorchCalculation().amendmentRange;
-
           totalAmendmentInDirection = (
             totalAmendmentInDirection +
             removingTorchCalculation().amendmentAngle
@@ -655,12 +688,24 @@ export default React.memo(function ModalBlock({
           totalAmendmentInDirection = totalAmendmentInDirection.toFixed(2);
         }
 
-        return {totalAmendmentInRange, totalAmendmentInDirection};
+        return {
+          totalAmendmentInRange,
+          totalAmendmentInDirection,
+          totalAmendmentInTube,
+        };
       } else {
-        return {totalAmendmentInRange, totalAmendmentInDirection};
+        return {
+          totalAmendmentInRange,
+          totalAmendmentInDirection,
+          totalAmendmentInTube,
+        };
       }
     } else {
-      return {totalAmendmentInRange, totalAmendmentInDirection};
+      return {
+        totalAmendmentInRange,
+        totalAmendmentInDirection,
+        totalAmendmentInTube,
+      };
     }
   }, [meteoData, basicData]);
   const test = () => {
@@ -673,6 +718,13 @@ export default React.memo(function ModalBlock({
         'amendmentAngle',
         totalAmendmentsCalculation.totalAmendmentInDirection,
       );
+
+      if (basicData.fuseName === 4 || basicData.fuseName === 1) {
+        changeTargetData(
+          'amendmentTube',
+          totalAmendmentsCalculation.totalAmendmentInTube,
+        );
+      }
     }
   };
 
@@ -702,6 +754,17 @@ export default React.memo(function ModalBlock({
                   }}>
                   {`ΔД: ${totalAmendmentsCalculation.totalAmendmentInRange}`}
                 </Text>
+                {(basicData.fuseName === 4 || basicData.fuseName === 1) && (
+                  <Text
+                    style={{
+                      color: '#750000',
+                      fontSize: 18,
+                      marginRight: 15,
+                    }}>
+                    {`ΔN: ${totalAmendmentsCalculation.totalAmendmentInTube}`}
+                  </Text>
+                )}
+
                 <Text
                   style={{
                     color: '#750000',
@@ -813,5 +876,3 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
-
-// export default ModalBlock;

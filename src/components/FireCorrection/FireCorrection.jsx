@@ -16,12 +16,7 @@ const FireCorrection = props => {
           <CardinalPointsBurst {...props} />
         </>
       )}
-      {basicData.fuseName === 2 && (
-        <>
-          <IlluminationAmmunition {...props} />
-        </>
-      )}
-      {basicData.fuseName === 3 && (
+      {(basicData.fuseName === 2 || basicData.fuseName === 3) && (
         <>
           <IlluminationAmmunition {...props} />
         </>

@@ -60,6 +60,7 @@ const initTargetData = {
   depthTarget: '',
   amendmentRange: '',
   amendmentAngle: '',
+  amendmentTube: '',
 };
 
 const initBurstData = {
@@ -855,7 +856,11 @@ const BatteryCommander = () => {
             />
             <CoordinatsVariant value={targetData} setValue={changeTargetData} />
             {/* Цель */}
-            <DescriptionTarget value={targetData} setValue={changeTargetData} />
+            <DescriptionTarget
+              value={targetData}
+              setValue={changeTargetData}
+              fuseName={basicData.fuseName}
+            />
             <TouchableOpacity
               disabled={targetData.numberTarget.length === 0}
               onPress={addTargets}
