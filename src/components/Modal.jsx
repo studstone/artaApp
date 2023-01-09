@@ -708,8 +708,16 @@ export default React.memo(function ModalBlock({
       };
     }
   }, [meteoData, basicData]);
-  const test = () => {
-    if (rangeСalculation !== 0) {
+  const onChange = () => {
+    if (
+      meteoData.airTemperature !== '' &&
+      meteoData.chargeTemperature !== '' &&
+      meteoData.deviationInitialSpeed !== '' &&
+      meteoData.directorateAngleWind !== '' &&
+      meteoData.heightWeatherPost !== '' &&
+      meteoData.pressure !== '' &&
+      meteoData.windSpeed !== ''
+    ) {
       changeTargetData(
         'amendmentRange',
         totalAmendmentsCalculation.totalAmendmentInRange,
@@ -779,7 +787,7 @@ export default React.memo(function ModalBlock({
                 style={[styles.button, styles.buttonClose]}
                 onPress={() => {
                   setModalVisible(!modalVisible);
-                  test();
+                  onChange();
                 }}>
                 <Text style={styles.textStyle}>Закрыть</Text>
               </Pressable>

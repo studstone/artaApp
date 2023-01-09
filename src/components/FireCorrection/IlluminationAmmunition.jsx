@@ -25,27 +25,6 @@ const inputs = {
   },
 };
 
-const inputs1 = {
-  rangeBurst: {
-    placeholder: 'Дальн. разрыва',
-    text: 'Др:',
-    keyboardType: 'numeric',
-    maxLength: 4,
-  },
-  angleBurst: {
-    placeholder: 'Угол разрыва',
-    text: 'УГр:',
-    keyboardType: 'numeric',
-    maxLength: 5,
-  },
-  burningTime: {
-    placeholder: 'Время горения',
-    text: 'Т гор:',
-    keyboardType: 'numeric',
-    maxLength: 5,
-  },
-};
-
 export default React.memo(function IlluminationAmmunition(props) {
   const [isVisible, setIsVisible] = React.useState(true);
 
@@ -159,49 +138,52 @@ export default React.memo(function IlluminationAmmunition(props) {
     return {proofreadingInAngle, proofreadingInAim};
   }, [value]);
 
+  const changeInputs = () => {
+    if (isVisible) {
+      delete inputs.heightBurst;
+
+      inputs.burningTime = {
+        placeholder: 'Время горения',
+        text: 'Т гор:',
+        keyboardType: 'numeric',
+        maxLength: 5,
+      };
+    } else {
+      delete inputs.burningTime;
+
+      inputs.heightBurst = {
+        placeholder: 'Уг.разр над ц',
+        text: 'ΔМр:',
+        keyboardType: 'numeric',
+        maxLength: 5,
+      };
+    }
+  };
+
   return (
     <>
       <Text style={styles.textHeader}>Расчет корректур</Text>
       <SwitchBlock
         value={isVisible}
         setValue={setIsVisible}
+        onPress={changeInputs}
         textTrue="На земле"
         textFalse="В воздухе"
       />
       <View style={styles.wrapper}>
-        {isVisible ? (
-          <>
-            {Object.entries(inputs).map(([key, item]) => (
-              <Input
-                key={key}
-                state={value[key]}
-                keyboardType={'numeric'}
-                setState={value => setValue(key, value)}
-                placeholder={item.placeholder}
-                placeholderTextColor={'black'}
-                maxLength={item.maxLength}
-                text={item.text}
-                style={styles.inputWrapper}
-              />
-            ))}
-          </>
-        ) : (
-          <>
-            {Object.entries(inputs1).map(([key, item]) => (
-              <Input
-                key={key}
-                state={value[key]}
-                keyboardType={'numeric'}
-                setState={value => setValue(key, value)}
-                placeholder={item.placeholder}
-                placeholderTextColor={'black'}
-                maxLength={item.maxLength}
-                text={item.text}
-                style={styles.inputWrapper}
-              />
-            ))}
-          </>
-        )}
+        {Object.entries(inputs).map(([key, item]) => (
+          <Input
+            key={key}
+            state={value[key]}
+            keyboardType={'numeric'}
+            setState={value => setValue(key, value)}
+            placeholder={item.placeholder}
+            placeholderTextColor={'black'}
+            maxLength={item.maxLength}
+            text={item.text}
+            style={styles.inputWrapper}
+          />
+        ))}
       </View>
       <View style={styles.answerWrapper}>
         <Text

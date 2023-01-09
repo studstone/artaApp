@@ -301,7 +301,7 @@ const BatteryCommander = () => {
           supportingAim = filterHangTrajectory.aim;
           dXtis = filterHangTrajectory.dXtis;
           dNtis = filterHangTrajectory.dNtis;
-          dRange = supportingRange - rangeСalculation;
+          dRange = supportingRange - calculatedRangeСalculation;
           installationFuse = filterHangTrajectory.installationFuse;
           time = filterHangTrajectory.Tc;
           Vd = filterHangTrajectory.Vd;
@@ -311,7 +311,7 @@ const BatteryCommander = () => {
           supportingRange = filterMortaryTrajectory.range;
           supportingAim = filterMortaryTrajectory.aim;
           dXtis = filterMortaryTrajectory.dXtis;
-          dRange = rangeСalculation - supportingRange;
+          dRange = calculatedRangeСalculation - supportingRange;
           installationFuse = filterMortaryTrajectory.installationFuse;
           time = filterMortaryTrajectory.Tc;
           Vd = filterMortaryTrajectory.Vd;
@@ -403,9 +403,11 @@ const BatteryCommander = () => {
     const aim = rangeFinalСalculation;
 
     const dAim = aim - supportingAim;
-    const tube = Math.round(dAim * dNtis + supportingTube);
+    const tube = Math.round(
+      dAim * dNtis + supportingTube + +targetData.amendmentTube,
+    );
     return tube;
-  }, [returnDataST, basicData]);
+  }, [returnDataST, basicData, targetData]);
   // /*расчет уровня*/
   const excessСalculation = React.useMemo(() => {
     if (rangeСalculation !== 0) {
