@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {ScrollView, View} from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Geolocation from '@react-native-community/geolocation';
@@ -14,10 +8,8 @@ import ModalBlock from '../components/Modal';
 import BasicData from '../components/BasicData/BasicData';
 import ObservationPost from '../components/ObservationPost';
 import FirePosition from '../components/FirePosition';
-import TargetsList from '../components/TargetsList';
-import CoordinatsVariant from '../components/Targets/CoordinatsVariant';
-import DescriptionTarget from '../components/DescriptionTarget/DescriptionTarget';
 import FireCorrection from '../components/FireCorrection/FireCorrection';
+import Target from '../components/Targets/Target';
 
 import shotingTables from '../DB/shotingTables';
 import DataCalcAdjustments from '../components/DataCalculatingAdjustments/DataCalcAdjustments';
@@ -48,6 +40,7 @@ const initFPData = {
 
 const initTargetData = {
   coordinateVariant: true,
+  targetsVariant: false,
   coordinateTargetX: '',
   coordinateTargetY: '',
   heightTarget: '',
@@ -56,11 +49,25 @@ const initTargetData = {
   verticalAngleTarget: '',
   numberTarget: '',
   nameTarget: '',
+  nameBorders: '',
   frontTarget: '',
   depthTarget: '',
+  bias: '',
   amendmentRange: '',
   amendmentAngle: '',
   amendmentTube: '',
+  coordinateTargetLeftX: '',
+  coordinateTargetLeftY: '',
+  heightTargetLeft: '',
+  coordinateTargetRightX: '',
+  coordinateTargetRightY: '',
+  heightTargetRight: '',
+  rangeTargetLeft: '',
+  angleTargetLeft: '',
+  verticalAngleTargetLeft: '',
+  rangeTargetRight: '',
+  angleTargetRight: '',
+  verticalAngleTargetRight: '',
 };
 
 const initBurstData = {
@@ -90,6 +97,9 @@ const BatteryCommander = () => {
 
   const [targets, setTargets] = React.useState([]);
   const [activeTarget, setActiveTarget] = React.useState(null);
+
+  const [borders, setBorders] = React.useState([]);
+  const [activeBorders, setActiveBorders] = React.useState(null);
 
   const [targetData, setTargetData] = React.useState({...initTargetData});
   const [burstData, setBurstData] = React.useState({...initBurstData});
@@ -192,44 +202,159 @@ const BatteryCommander = () => {
       // saving error
     }
   };
+  /** расчет X,Y нзо */
+  const borderCalculation = React.useMemo(() => {
+    let targetRightX = 0;
+    let targetRightY = 0;
+    let targetLeftX = 0;
+    let targetLeftY = 0;
+    if (targetData.coordinateVariant) {
+      targetRightX = targetData.coordinateTargetRightX;
 
+      targetRightY = targetData.coordinateTargetRightY;
+
+      targetLeftX = targetData.coordinateTargetLeftX;
+
+      targetLeftY = targetData.coordinateTargetLeftY;
+    } else {
+      targetRightX = Math.round(
+        +OPData.coordinateOPX +
+          targetData.rangeTargetRight *
+            Math.cos(targetData.angleTargetRight * 6 * (Math.PI / 180)),
+      );
+
+      targetRightY = Math.round(
+        +OPData.coordinateOPY +
+          targetData.rangeTargetRight *
+            Math.sin(targetData.angleTargetRight * 6 * (Math.PI / 180)),
+      );
+
+      targetLeftX = Math.round(
+        +OPData.coordinateOPX +
+          targetData.rangeTargetLeft *
+            Math.cos(targetData.angleTargetLeft * 6 * (Math.PI / 180)),
+      );
+
+      targetLeftY = Math.round(
+        +OPData.coordinateOPY +
+          targetData.rangeTargetLeft *
+            Math.sin(targetData.angleTargetLeft * 6 * (Math.PI / 180)),
+      );
+    }
+
+    return {targetRightX, targetRightY, targetLeftX, targetLeftY};
+  }, [targetData, OPData]);
+  // /*расчет дир.угл пр-лев*/
+  const angleBorderСalculation = React.useMemo(() => {
+    let directionalAngle = 0;
+    let angle = 0;
+
+    if (targetData.coordinateVariant) {
+      directionalAngle =
+        (Math.atan2(
+          targetData.coordinateTargetLeftY - targetData.coordinateTargetRightY,
+          targetData.coordinateTargetLeftX - targetData.coordinateTargetRightX,
+        ) *
+          180) /
+        Math.PI /
+        6;
+    } else {
+      directionalAngle =
+        (Math.atan2(
+          borderCalculation.targetLeftY - borderCalculation.targetRightY,
+          borderCalculation.targetLeftX - borderCalculation.targetRightX,
+        ) *
+          180) /
+        Math.PI /
+        6;
+    }
+
+    if (directionalAngle < 0) {
+      angle = directionalAngle + 60;
+    } else {
+      angle = directionalAngle;
+    }
+    return angle.toFixed(2);
+  }, [targetData, borderCalculation]);
   /** расчет х,у цели*/
   const coordinateTargetСalculation = React.useMemo(() => {
-    const targetX = Math.round(
-      +OPData.coordinateOPX +
-        targetData.rangeTarget *
-          Math.cos(targetData.angleTarget * 6 * (Math.PI / 180)),
-    );
+    let targetX = 0;
+    let targetY = 0;
+    if (targetData.targetsVariant) {
+      targetX = Math.round(
+        +borderCalculation.targetRightX +
+          targetData.bias *
+            Math.cos(angleBorderСalculation * 6 * (Math.PI / 180)),
+      );
+      targetY = Math.round(
+        +borderCalculation.targetRightY +
+          targetData.bias *
+            Math.sin(angleBorderСalculation * 6 * (Math.PI / 180)),
+      );
+    } else {
+      targetX = Math.round(
+        +OPData.coordinateOPX +
+          targetData.rangeTarget *
+            Math.cos(targetData.angleTarget * 6 * (Math.PI / 180)),
+      );
 
-    const targetY = Math.round(
-      +OPData.coordinateOPY +
-        targetData.rangeTarget *
-          Math.sin(targetData.angleTarget * 6 * (Math.PI / 180)),
-    );
+      targetY = Math.round(
+        +OPData.coordinateOPY +
+          targetData.rangeTarget *
+            Math.sin(targetData.angleTarget * 6 * (Math.PI / 180)),
+      );
+    }
     return {targetX, targetY};
-  }, [OPData, targetData.rangeTarget, targetData.angleTarget]);
+  }, [OPData, targetData, angleBorderСalculation]);
   /*расчет топо дальности*/
   const rangeСalculation = React.useMemo(() => {
     let topographicRange = 0;
 
     if (targetData.coordinateVariant) {
       if (
-        targetData.coordinateTargetX !== '' &&
-        targetData.coordinateTargetY !== ''
+        (targetData.coordinateTargetX !== '' &&
+          targetData.coordinateTargetY !== '') ||
+        (targetData.coordinateTargetLeftX !== '' &&
+          targetData.coordinateTargetLeftY !== '' &&
+          targetData.coordinateTargetRightX !== '' &&
+          targetData.coordinateTargetRightY !== '')
       ) {
-        topographicRange = Math.round(
-          Math.sqrt(
-            Math.pow(targetData.coordinateTargetX - FPData.coordinateFPX, 2) +
-              Math.pow(targetData.coordinateTargetY - FPData.coordinateFPY, 2),
-          ),
-        );
-
+        if (targetData.targetsVariant) {
+          topographicRange = Math.round(
+            Math.sqrt(
+              Math.pow(
+                coordinateTargetСalculation.targetX - FPData.coordinateFPX,
+                2,
+              ) +
+                Math.pow(
+                  coordinateTargetСalculation.targetY - FPData.coordinateFPY,
+                  2,
+                ),
+            ),
+          );
+        } else {
+          topographicRange = Math.round(
+            Math.sqrt(
+              Math.pow(targetData.coordinateTargetX - FPData.coordinateFPX, 2) +
+                Math.pow(
+                  targetData.coordinateTargetY - FPData.coordinateFPY,
+                  2,
+                ),
+            ),
+          );
+        }
         return topographicRange;
       } else {
         return topographicRange;
       }
     } else {
-      if (targetData.rangeTarget !== '' && targetData.angleTarget !== '') {
+      if (
+        (targetData.rangeTarget !== '' && targetData.angleTarget !== '') ||
+        (targetData.rangeTargetLeft !== '' &&
+          targetData.angleTargetLeft !== '' &&
+          targetData.rangeTargetRight !== '' &&
+          targetData.angleTargetRight !== '')
+      ) {
         topographicRange = Math.round(
           Math.sqrt(
             Math.pow(
@@ -439,16 +564,7 @@ const BatteryCommander = () => {
     let directionalAngle = 0;
     let angle = 0;
 
-    if (targetData.coordinateVariant) {
-      directionalAngle =
-        (Math.atan2(
-          targetData.coordinateTargetY - FPData.coordinateFPY,
-          targetData.coordinateTargetX - FPData.coordinateFPX,
-        ) *
-          180) /
-        Math.PI /
-        6;
-    } else {
+    if (targetData.targetsVariant) {
       directionalAngle =
         (Math.atan2(
           coordinateTargetСalculation.targetY - FPData.coordinateFPY,
@@ -457,6 +573,26 @@ const BatteryCommander = () => {
           180) /
         Math.PI /
         6;
+    } else {
+      if (targetData.coordinateVariant) {
+        directionalAngle =
+          (Math.atan2(
+            targetData.coordinateTargetY - FPData.coordinateFPY,
+            targetData.coordinateTargetX - FPData.coordinateFPX,
+          ) *
+            180) /
+          Math.PI /
+          6;
+      } else {
+        directionalAngle =
+          (Math.atan2(
+            coordinateTargetСalculation.targetY - FPData.coordinateFPY,
+            coordinateTargetСalculation.targetX - FPData.coordinateFPX,
+          ) *
+            180) /
+          Math.PI /
+          6;
+      }
     }
 
     if (directionalAngle < 0) {
@@ -465,15 +601,19 @@ const BatteryCommander = () => {
       angle = directionalAngle;
     }
     return angle.toFixed(2);
-  }, [targetData, FPData]);
+  }, [targetData, FPData, coordinateTargetСalculation]);
   /*расчет топографического доворота*/
   const angleFromMainStreamСalculation = React.useMemo(() => {
     let directionAlngle = 0;
 
     if (targetData.coordinateVariant) {
       if (
-        targetData.coordinateTargetX !== '' &&
-        targetData.coordinateTargetY !== ''
+        (targetData.coordinateTargetX !== '' &&
+          targetData.coordinateTargetY !== '') ||
+        (targetData.coordinateTargetLeftX !== '' &&
+          targetData.coordinateTargetLeftY !== '' &&
+          targetData.coordinateTargetRightX !== '' &&
+          targetData.coordinateTargetRightY !== '')
       ) {
         if (angleСalculation >= 52.5 && angleСalculation <= 60) {
           directionAlngle = angleСalculation - basicData.mainStream - 60;
@@ -489,7 +629,13 @@ const BatteryCommander = () => {
         return directionAlngle.toFixed(2);
       }
     } else {
-      if (targetData.angleTarget !== '' && targetData.rangeTarget !== '') {
+      if (
+        (targetData.rangeTarget !== '' && targetData.angleTarget !== '') ||
+        (targetData.rangeTargetLeft !== '' &&
+          targetData.angleTargetLeft !== '' &&
+          targetData.rangeTargetRight !== '' &&
+          targetData.angleTargetRight !== '')
+      ) {
         if (angleСalculation >= 52.5 && angleСalculation <= 60) {
           directionAlngle = angleСalculation - basicData.mainStream - 60;
         } else {
@@ -556,14 +702,18 @@ const BatteryCommander = () => {
     const dXtis = returnDataST.dXtis;
     let jump = 0;
 
-    if (targetData.depthTarget === '') {
-      jump = 0;
+    if (targetData.targetsVariant) {
+      jump = Math.round(targetData.frontTarget / 4 / dXtis);
     } else {
-      jump = Math.round(targetData.depthTarget / 3 / dXtis);
+      if (targetData.depthTarget === '') {
+        jump = 0;
+      } else {
+        jump = Math.round(targetData.depthTarget / 3 / dXtis);
+      }
     }
 
     return jump;
-  }, [returnDataST.dXtis, targetData.depthTarget]);
+  }, [returnDataST.dXtis, targetData.depthTarget, targetData.frontTarget]);
   // /*расчет интервала веера на орудие*/
   const intervalFanCalculation = React.useMemo(() => {
     let intervalFan = 0;
@@ -585,15 +735,33 @@ const BatteryCommander = () => {
     let topographicRange = 0;
 
     if (rangeСalculation !== 0) {
-      if (targetData.coordinateVariant) {
+      if (targetData.targetsVariant) {
         topographicRange = Math.round(
           Math.sqrt(
-            Math.pow(targetData.coordinateTargetX - OPData.coordinateOPX, 2) +
-              Math.pow(targetData.coordinateTargetY - OPData.coordinateOPY, 2),
+            Math.pow(
+              coordinateTargetСalculation.targetX - OPData.coordinateOPX,
+              2,
+            ) +
+              Math.pow(
+                coordinateTargetСalculation.targetY - OPData.coordinateOPY,
+                2,
+              ),
           ),
         );
       } else {
-        topographicRange = targetData.rangeTarget;
+        if (targetData.coordinateVariant) {
+          topographicRange = Math.round(
+            Math.sqrt(
+              Math.pow(targetData.coordinateTargetX - OPData.coordinateOPX, 2) +
+                Math.pow(
+                  targetData.coordinateTargetY - OPData.coordinateOPY,
+                  2,
+                ),
+            ),
+          );
+        } else {
+          topographicRange = targetData.rangeTarget;
+        }
       }
 
       return topographicRange;
@@ -607,17 +775,28 @@ const BatteryCommander = () => {
     let angle = 0;
 
     if (rangeСalculation !== 0) {
-      if (targetData.coordinateVariant) {
+      if (targetData.targetsVariant) {
         directionalAngle =
           (Math.atan2(
-            targetData.coordinateTargetY - OPData.coordinateOPY,
-            targetData.coordinateTargetX - OPData.coordinateOPX,
+            coordinateTargetСalculation.targetY - OPData.coordinateOPY,
+            coordinateTargetСalculation.targetX - OPData.coordinateOPX,
           ) *
             180) /
           Math.PI /
           6;
       } else {
-        directionalAngle = +targetData.angleTarget;
+        if (targetData.coordinateVariant) {
+          directionalAngle =
+            (Math.atan2(
+              targetData.coordinateTargetY - OPData.coordinateOPY,
+              targetData.coordinateTargetX - OPData.coordinateOPX,
+            ) *
+              180) /
+            Math.PI /
+            6;
+        } else {
+          directionalAngle = +targetData.angleTarget;
+        }
       }
 
       if (directionalAngle < 0) {
@@ -707,6 +886,21 @@ const BatteryCommander = () => {
       return 0;
     }
   };
+  /**определить положение рубежа */
+  const positionBorder = () => {
+    const angleFPinRX = 60 - angleBorderСalculation;
+    const angle = +angleСalculation + angleFPinRX;
+
+    let positionBorder = '';
+
+    if (angle >= 7.5 && angle <= 15) {
+      positionBorder = 'Фр-й';
+    } else {
+      positionBorder = 'Фл-й';
+    }
+
+    return positionBorder;
+  };
   // /*преобразовать точку в пробел */
   const replaceAngle = angle => {
     const reg = /\./;
@@ -721,16 +915,32 @@ const BatteryCommander = () => {
     setTargetData(targets[value]);
   };
 
+  const onChangeActiveBorders = value => {
+    setActiveBorders(value);
+    setTargetData(borders[value]);
+  };
+
   const addTargets = () => {
     setTargets(prev => [...prev, targetData]);
     setTargetData(prev => ({
       ...initTargetData,
       coordinateVariant: prev.coordinateVariant,
+      targetsVariant: prev.targetsVariant,
+    }));
+  };
+
+  const addBorders = () => {
+    setBorders(prev => [...prev, targetData]);
+    setTargetData(prev => ({
+      ...initTargetData,
+      coordinateVariant: prev.coordinateVariant,
+      targetsVariant: prev.targetsVariant,
     }));
   };
 
   const clearTargets = () => {
     setTargets([]);
+    setBorders([]);
     setTargetData({...initTargetData});
   };
   const objFunctionDCA = {
@@ -761,6 +971,7 @@ const BatteryCommander = () => {
     fanCalculation,
     intervalFanCalculation,
     basicData,
+    positionBorder,
   };
   const objFunctionFC = {
     FPData,
@@ -850,25 +1061,21 @@ const BatteryCommander = () => {
               disabled={OPData.startLocationOP}
               onPress={onChangeGeoCoordinats}
             />
-            <TargetsList
-              data={targets}
-              active={activeTarget}
-              setActive={onChangeActiveTarget}
-              clear={clearTargets}
+            {/**Цель */}
+            <Target
+              targets={targets}
+              borders={borders}
+              activeTarget={activeTarget}
+              activeBorders={activeBorders}
+              onChangeActiveTarget={onChangeActiveTarget}
+              onChangeActiveBorders={onChangeActiveBorders}
+              clearTargets={clearTargets}
+              targetData={targetData}
+              changeTargetData={changeTargetData}
+              basicData={basicData}
+              addTargets={addTargets}
+              addBorders={addBorders}
             />
-            <CoordinatsVariant value={targetData} setValue={changeTargetData} />
-            {/* Цель */}
-            <DescriptionTarget
-              value={targetData}
-              setValue={changeTargetData}
-              fuseName={basicData.fuseName}
-            />
-            <TouchableOpacity
-              disabled={targetData.numberTarget.length === 0}
-              onPress={addTargets}
-              style={styles.buttonStop}>
-              <Text style={styles.textStop}>Стой! Записать!</Text>
-            </TouchableOpacity>
             {/* Установки */}
             <FiringEquipment {...objFunctionFE} />
             {/* Данные для расчета корректур */}
@@ -881,24 +1088,5 @@ const BatteryCommander = () => {
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  buttonStop: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingRight: 2,
-    paddingLeft: 2,
-    marginTop: 12,
-    width: '100%',
-    height: 45,
-    backgroundColor: '#680202',
-    borderRadius: 5,
-  },
-  textStop: {
-    color: '#ffffff',
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-});
 
 export default BatteryCommander;

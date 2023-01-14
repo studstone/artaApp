@@ -3,7 +3,7 @@ import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
 import SelectDropdown from 'react-native-select-dropdown';
 
-const TargetsList = ({data, active, setActive, clear}) => {
+const TargetsList = ({data, active, setActive, clear, defaultButtonText}) => {
   return (
     <View style={styles.wrapper}>
       <SelectDropdown
@@ -18,14 +18,14 @@ const TargetsList = ({data, active, setActive, clear}) => {
         onSelect={(_, index) => {
           setActive(index);
         }}
-        defaultButtonText={'Цели'}
+        defaultButtonText={defaultButtonText}
         defaultValueByIndex={active}
       />
       <TouchableOpacity
         onPress={clear}
         style={styles.button}
         disabled={data.length === 0}>
-        <Text style={{fontSize: 18}}>Очистить цели</Text>
+        <Text style={{fontSize: 18}}>Очистить список</Text>
       </TouchableOpacity>
     </View>
   );

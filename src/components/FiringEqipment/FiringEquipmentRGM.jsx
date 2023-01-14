@@ -17,6 +17,8 @@ const FiringEquipmentRGM = props => {
   const fanCalculation = props.fanCalculation;
   const intervalFanCalculation = props.intervalFanCalculation;
   const time = props.returnDataST.time;
+  const positionBorder = props.positionBorder();
+  const targetsVariant = props.targetData.targetsVariant;
 
   const items = [
     {
@@ -65,7 +67,13 @@ const FiringEquipmentRGM = props => {
       text: `Ди: ${calculatedRangeСalculation}`,
     },
   ];
-
+  const changeItems = React.useMemo(() => {
+    if (targetsVariant) {
+      items.push({
+        text: `Пол-е: ${positionBorder}`,
+      });
+    }
+  }, [targetsVariant]);
   return (
     <>
       <View style={styles.wrapper}>

@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   textHeader: {
     textAlign: 'center',
-    fontSize: 30,
+    fontSize: 28,
     color: '#000a96',
     marginBottom: 15,
   },

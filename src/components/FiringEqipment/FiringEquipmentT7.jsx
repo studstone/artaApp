@@ -17,6 +17,8 @@ export default React.memo(function FiringEquipmentT7(props) {
   const intervalFanCalculation = props.intervalFanCalculation;
   const time = props.returnDataST.time;
   const tube = props.tubeCalculation;
+  const positionBorder = props.positionBorder();
+  const targetsVariant = props.targetData.targetsVariant;
 
   const items = [
     {
@@ -71,6 +73,13 @@ export default React.memo(function FiringEquipmentT7(props) {
       text: '',
     },
   ];
+  const changeItems = React.useMemo(() => {
+    if (targetsVariant) {
+      items.push({
+        text: `Пол-е: ${positionBorder}`,
+      });
+    }
+  }, [targetsVariant]);
 
   return (
     <>

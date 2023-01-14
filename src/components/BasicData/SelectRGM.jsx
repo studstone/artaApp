@@ -40,7 +40,6 @@ const selects = {
 };
 
 export default React.memo(function SelectRGM({value, setValue}) {
-  // console.log(value.fuseName === (0 && 1 && 3));
   return (
     <>
       {Object.entries(selects).map(([key, item], index) => (
