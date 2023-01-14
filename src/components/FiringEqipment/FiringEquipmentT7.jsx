@@ -19,6 +19,7 @@ export default React.memo(function FiringEquipmentT7(props) {
   const tube = props.tubeCalculation;
   const positionBorder = props.positionBorder();
   const targetsVariant = props.targetData.targetsVariant;
+  const borderRangeСalculation = props.borderRangeСalculation;
 
   const items = [
     {
@@ -75,6 +76,9 @@ export default React.memo(function FiringEquipmentT7(props) {
   ];
   const changeItems = React.useMemo(() => {
     if (targetsVariant) {
+      items.push({
+        text: `Дт.руб: ${borderRangeСalculation}`,
+      });
       items.push({
         text: `Пол-е: ${positionBorder}`,
       });

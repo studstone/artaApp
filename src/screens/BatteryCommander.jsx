@@ -373,6 +373,29 @@ const BatteryCommander = () => {
       }
     }
   }, [targetData, FPData]);
+  /**расчет длинны рубежа */
+  const borderRangeСalculation = React.useMemo(() => {
+    let topographicRange = 0;
+
+    if (targetData.targetsVariant) {
+      topographicRange = Math.round(
+        Math.sqrt(
+          Math.pow(
+            borderCalculation.targetLeftX - borderCalculation.targetRightX,
+            2,
+          ) +
+            Math.pow(
+              borderCalculation.targetLeftY - borderCalculation.targetRightY,
+              2,
+            ),
+        ),
+      );
+    } else {
+      topographicRange = 0;
+    }
+
+    return topographicRange;
+  }, [targetData]);
   /*расчет исчисленной дальности*/
   const calculatedRangeСalculation = React.useMemo(() => {
     const calculatedRange = rangeСalculation + +targetData.amendmentRange;
@@ -972,6 +995,7 @@ const BatteryCommander = () => {
     intervalFanCalculation,
     basicData,
     positionBorder,
+    borderRangeСalculation,
   };
   const objFunctionFC = {
     FPData,

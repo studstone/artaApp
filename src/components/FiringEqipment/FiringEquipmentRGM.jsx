@@ -19,6 +19,7 @@ const FiringEquipmentRGM = props => {
   const time = props.returnDataST.time;
   const positionBorder = props.positionBorder();
   const targetsVariant = props.targetData.targetsVariant;
+  const borderRangeСalculation = props.borderRangeСalculation;
 
   const items = [
     {
@@ -69,6 +70,9 @@ const FiringEquipmentRGM = props => {
   ];
   const changeItems = React.useMemo(() => {
     if (targetsVariant) {
+      items.push({
+        text: `Дт.руб: ${borderRangeСalculation}`,
+      });
       items.push({
         text: `Пол-е: ${positionBorder}`,
       });
