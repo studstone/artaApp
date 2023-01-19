@@ -43,6 +43,7 @@ export default React.memo(function CardinalPointsBurst(props) {
     const coordinateX = +OPData.coordinateOPX;
     const coordinateY = +OPData.coordinateOPY;
     const angle = +targetData.angleTarget;
+
     if (targetData.coordinateVariant) {
       targetX = +targetData.coordinateTargetX;
       targetY = +targetData.coordinateTargetY;
@@ -56,14 +57,17 @@ export default React.memo(function CardinalPointsBurst(props) {
           targetData.rangeTarget * Math.sin(angle * 6 * (Math.PI / 180)),
       );
     }
+
     const burstX = +targetX + +value.north - +value.south;
     const burstY = +targetY + +value.east - +value.west;
+
     const topographicRangeBurst = Math.round(
       Math.sqrt(
         Math.pow(burstX - FPData.coordinateFPX, 2) +
           Math.pow(burstY - FPData.coordinateFPY, 2),
       ),
     );
+
     const directionalAngle =
       (Math.atan2(
         burstY - FPData.coordinateFPY,
@@ -72,18 +76,22 @@ export default React.memo(function CardinalPointsBurst(props) {
         180) /
       Math.PI /
       6;
+
     let angleFPInBurst = 0;
     let directionAlngle = 0;
+
     if (directionalAngle < 0) {
       angleFPInBurst = directionalAngle + 60;
     } else {
       angleFPInBurst = directionalAngle;
     }
+
     if (angleFPInBurst >= 52.5 && angleFPInBurst <= 60) {
       directionAlngle = angleFPInBurst - basicData.mainStream - 60;
     } else {
       directionAlngle = angleFPInBurst - basicData.mainStream;
     }
+
     if (rangeСalculation === 0 || returnDataST.dXtis === 0) {
       proofreadingInAngle = 0;
       proofreadingInAim = 0;
@@ -101,7 +109,12 @@ export default React.memo(function CardinalPointsBurst(props) {
       proofreadingInAngle = (
         angleFromMainStreamСalculation - directionAlngle.toFixed(2)
       ).toFixed(2);
+
+      if (proofreadingInAngle >= 52.5 || proofreadingInAngle <= 60) {
+        proofreadingInAngle = (proofreadingInAngle - 60).toFixed(2);
+      }
     }
+
     return {proofreadingInAngle, proofreadingInAim};
   }, [value]);
   return (

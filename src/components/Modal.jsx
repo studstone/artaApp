@@ -707,7 +707,7 @@ export default React.memo(function ModalBlock({
         totalAmendmentInTube,
       };
     }
-  }, [meteoData, basicData]);
+  }, [meteoData, basicData, targetData]);
   const onChange = () => {
     if (
       meteoData.airTemperature !== '' &&
@@ -716,7 +716,8 @@ export default React.memo(function ModalBlock({
       meteoData.directorateAngleWind !== '' &&
       meteoData.heightWeatherPost !== '' &&
       meteoData.pressure !== '' &&
-      meteoData.windSpeed !== ''
+      meteoData.windSpeed !== '' &&
+      rangeСalculation !== 0
     ) {
       changeTargetData(
         'amendmentRange',

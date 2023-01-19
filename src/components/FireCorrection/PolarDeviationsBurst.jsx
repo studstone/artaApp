@@ -42,16 +42,19 @@ export default React.memo(function PolarDeviationsBurst(props) {
       coordinateX +
         burstData.rangeBurst * Math.cos(angle * 6 * (Math.PI / 180)),
     );
+
     const burstY = Math.round(
       coordinateY +
         burstData.rangeBurst * Math.sin(angle * 6 * (Math.PI / 180)),
     );
+
     const topographicRangeBurst = Math.round(
       Math.sqrt(
         Math.pow(burstX - FPData.coordinateFPX, 2) +
           Math.pow(burstY - FPData.coordinateFPY, 2),
       ),
     );
+
     const directionalAngle =
       (Math.atan2(
         burstY - FPData.coordinateFPY,
@@ -60,18 +63,22 @@ export default React.memo(function PolarDeviationsBurst(props) {
         180) /
       Math.PI /
       6;
+
     let angleFPInBurst = 0;
     let directionAlngle = 0;
+
     if (directionalAngle < 0) {
       angleFPInBurst = directionalAngle + 60;
     } else {
       angleFPInBurst = directionalAngle;
     }
+
     if (angleFPInBurst >= 52.5 && angleFPInBurst <= 60) {
       directionAlngle = angleFPInBurst - basicData.mainStream - 60;
     } else {
       directionAlngle = angleFPInBurst - basicData.mainStream;
     }
+
     if (burstData.rangeBurst === '' || burstData.angleBurst === '') {
       proofreadingInAngle = 0;
       proofreadingInAim = 0;
@@ -86,15 +93,19 @@ export default React.memo(function PolarDeviationsBurst(props) {
             -1,
         );
       }
-      proofreadingInAngle = (
-        angleFromMainStreamСalculation - directionAlngle
-      ).toFixed(2);
+
+      proofreadingInAngle = angleFromMainStreamСalculation - directionAlngle;
+
+      if (proofreadingInAngle >= 52.5 || proofreadingInAngle <= 60) {
+        proofreadingInAngle = (proofreadingInAngle - 60).toFixed(2);
+      }
     }
+
     return {proofreadingInAngle, proofreadingInAim};
   }, [value]);
   return (
     <>
-      <Text style={styles.textHeader}>Расчет корректур (Др,&nbsp; УГр)</Text>
+      <Text style={styles.textHeader}>Расчет корректур (Др,&nbsp;УГр)</Text>
       <View style={styles.wrapper}>
         {Object.entries(inputs).map(([key, item]) => (
           <Input
@@ -149,7 +160,7 @@ const styles = StyleSheet.create({
   },
   textHeader: {
     textAlign: 'center',
-    fontSize: 28,
+    fontSize: 30,
     color: '#000a96',
     marginBottom: 15,
   },

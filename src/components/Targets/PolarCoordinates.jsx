@@ -8,19 +8,19 @@ const targets = {
     placeholder: 'Дальн. ком',
     keyboardType: 'numeric',
     maxLength: 5,
-    text: 'Дпр:',
+    text: 'Дк:',
   },
   angleTarget: {
     placeholder: 'Уг на цель',
     keyboardType: 'numeric',
     maxLength: 5,
-    text: 'Уг.к.пр:',
+    text: 'Уг.к:',
   },
   verticalAngleTarget: {
     placeholder: 'Угол Мц',
     keyboardType: 'numeric',
     maxLength: 4,
-    text: 'Уг Мц.пр:',
+    text: 'Уг Мц:',
   },
 };
 

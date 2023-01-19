@@ -67,17 +67,23 @@ const FiringEquipmentRGM = props => {
     {
       text: `Ди: ${calculatedRangeСalculation}`,
     },
+    {
+      text: '',
+    },
+    {
+      text: `${targetsVariant ? `Дт.руб: ${borderRangeСalculation}` : ''}`,
+    },
+    {
+      text: '',
+    },
+    {
+      text: '',
+    },
+    {
+      text: `${targetsVariant ? `Пол-е: ${positionBorder}` : ''}`,
+    },
   ];
-  const changeItems = React.useMemo(() => {
-    if (targetsVariant) {
-      items.push({
-        text: `Дт.руб: ${borderRangeСalculation}`,
-      });
-      items.push({
-        text: `Пол-е: ${positionBorder}`,
-      });
-    }
-  }, [targetsVariant]);
+
   return (
     <>
       <View style={styles.wrapper}>
