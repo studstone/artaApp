@@ -96,10 +96,12 @@ export default React.memo(function PolarDeviationsBurst(props) {
 
       proofreadingInAngle = angleFromMainStreamСalculation - directionAlngle;
 
-      if (proofreadingInAngle >= 52.5 || proofreadingInAngle <= 60) {
+      if (proofreadingInAngle >= 52.5 && proofreadingInAngle <= 60) {
         proofreadingInAngle = (proofreadingInAngle - 60).toFixed(2);
+      } else {
+        proofreadingInAngle = proofreadingInAngle.toFixed(2);
       }
-    }
+    } 
 
     return {proofreadingInAngle, proofreadingInAim};
   }, [value]);

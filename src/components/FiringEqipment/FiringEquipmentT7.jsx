@@ -59,7 +59,7 @@ export default React.memo(function FiringEquipmentT7(props) {
           : `Ур: ${replaceAngle(excessСalculation)}`,
     },
     {
-      text: '',
+      text: `${targetsVariant ? `Дт.руб: ${borderRangeСalculation}` : ''}`,
     },
     {
       text: `Ди: ${calculatedRangeСalculation}`,
@@ -71,19 +71,9 @@ export default React.memo(function FiringEquipmentT7(props) {
           : `δи: ${replaceAngle(calculatedAngleFromMainStreamСalculation)}`,
     },
     {
-      text: '',
+      text: `${targetsVariant ? `Пол-е: ${positionBorder}` : ''}`,
     },
   ];
-  const changeItems = React.useMemo(() => {
-    if (targetsVariant) {
-      items.push({
-        text: `Дт.руб: ${borderRangeСalculation}`,
-      });
-      items.push({
-        text: `Пол-е: ${positionBorder}`,
-      });
-    }
-  }, [targetsVariant]);
 
   return (
     <>

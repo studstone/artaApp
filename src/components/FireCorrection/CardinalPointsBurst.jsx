@@ -91,8 +91,8 @@ export default React.memo(function CardinalPointsBurst(props) {
     } else {
       directionAlngle = angleFPInBurst - basicData.mainStream;
     }
-
-    if (rangeСalculation === 0 || returnDataST.dXtis === 0) {
+    
+    if (burstX === targetX && burstY === targetY) {
       proofreadingInAngle = 0;
       proofreadingInAim = 0;
     } else {
@@ -110,11 +110,11 @@ export default React.memo(function CardinalPointsBurst(props) {
         angleFromMainStreamСalculation - directionAlngle.toFixed(2)
       ).toFixed(2);
 
-      if (proofreadingInAngle >= 52.5 || proofreadingInAngle <= 60) {
+      if (proofreadingInAngle >= 52.5 && proofreadingInAngle <= 60) {
         proofreadingInAngle = (proofreadingInAngle - 60).toFixed(2);
+      } else {
       }
     }
-
     return {proofreadingInAngle, proofreadingInAim};
   }, [value]);
   return (
